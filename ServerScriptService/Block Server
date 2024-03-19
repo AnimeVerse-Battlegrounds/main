@@ -1,0 +1,27 @@
+local remote = game.ReplicatedStorage.BlockEvent
+local function StopAnimation(h, a)
+	for i, v in pairs(h:GetPlayingANimationTracks()) do
+		if v.Name == a then
+			v:Stop()
+		end
+	end
+end
+
+remote.OnServerEvent:Connect(function(plr, blocking)
+	local character = plr.Character
+	local humanoid = character.Humanoid
+	
+	
+	if blocking then
+		local b = humanoid:LoadAnimation(game.ReplicatedStorage["BlockAnims"].Blocking)
+		character:SetAttribute("Blocking", true)
+		b:play()
+	else
+		for i, a in pairs(humanoid:GetPlayingAnimationsTracks()) do
+			if a == "Blocking" then
+				a:Stop()
+			end
+		
+		end
+	end
+end)
