@@ -1,0 +1,39 @@
+local rp = game:GetService("ReplicatedStorage")
+local ts = game:GetService("TweenService")
+local plr = game.Players.LocalPlayer
+
+function CreateAttachment(name, pos, length)
+
+	local att = Instance.new("Attachment")
+	att.Name = name
+	att.Parent = workspace.Terrain
+	
+	if typeof(pos) == "Vector3" then
+		att.WorldPosition = pos
+	elseif typeof(pos) == "CFrame" then
+		att.WorldCFrame = pos
+	end
+	
+	task.spawn(function()
+		wait(length)
+		att:Destroy()
+	end)
+
+	return att
+end
+
+function CreateKiBlastExplosion(fromPlayer, pos, color, damage)
+	
+	local ef = rp["Ki Blast"].KiBlastExplosion:Clone()
+	ef.Color = color
+	ef.Position = pos
+	ef.Parent = workspace.FX
+	
+	local s = rp["Ki Blast"].Explosion:Clone()
+	s.Parent = ef
+	s:Play()
+	
+	if fromPlayer == plr.Name then
+		rp.Events.KiBlast:FireServer(pos, damage)
+	end
+end
