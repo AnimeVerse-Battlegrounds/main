@@ -1,0 +1,16 @@
+local rp = game:GetService("ReplicatedStorage")
+
+function KiBlastExplosion(Player, pos, damage)
+	
+	for i,v in pairs(workspace:GetDescendants()) do
+		if v:FindFirstChild("Humanoid") 
+			and v.Name ~= Player.Name 
+			and v.PrimaryPart
+			and (v.PrimaryPart.Position - pos).Magnitude <= 13
+		then
+			v.Humanoid:TakeDamage(damage)
+		end
+	end
+end
+
+rp.Events.KiBlast.OnServerEvent:Connect(KiBlastExplosion)
