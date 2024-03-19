@@ -88,4 +88,39 @@ function FXAdded(i)
 			end
 			
 			task.wait()
-		end	
+		end
+
+		touchev:Disconnect()
+		
+		if hitv == false then
+			CreateKiBlastExplosion(i:GetAttribute("From"), 
+				i.Position, 
+				i.Color, 
+				i:GetAttribute("Damage")
+			)
+			i:Destroy()
+		end
+		
+	elseif i.Name == "KiBlastExplosion" then
+		
+		local t = ts:Create(i, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 4, true, 0), {
+			Size = i.Size/1.3,
+		})
+
+		t:Play()
+		t.Completed:Connect(function()
+
+			local t = ts:Create(i, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+				Size = i.Size * 2.5,
+				Transparency = 1,
+			})
+
+			t:Play()
+			t.Completed:Connect(function()
+				i:Destroy()
+			end)
+		end)
+	end
+end
+
+workspace.FX.ChildAdded:Connect(FXAdded)
