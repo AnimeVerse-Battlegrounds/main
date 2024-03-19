@@ -102,3 +102,32 @@ script.Parent.OnServerEvent:Connect(function(plr,Mousehit)
 					end
 
 				end))
+
+				local explosion = folder.Explosion:Clone()
+				explosion.Parent = Star
+				explosion:Play()
+
+
+				for i,v in pairs(folder.Explosions:GetChildren())do
+					local effect = v:Clone()
+					local Amount = effect.Rate/2
+					effect.Parent = Star.mid
+					effect.Rate = 0
+					effect.Enabled = true
+					effect:Emit(Amount)
+				end
+
+				Star.Transparency = 1
+				Star.PointLight.Enabled = false
+
+				game:GetService('Debris'):AddItem(Star,3)
+			end)
+			wait(.07)
+		end
+		character.Humanoid.AutoRotate = true
+		character.Humanoid.WalkSpeed = game.StarterPlayer.CharacterWalkSpeed
+		character.Humanoid.JumpPower = game.StarterPlayer.CharacterJumpPower
+		wait(CD)
+		debounce = false
+	end
+end)
