@@ -1,5 +1,6 @@
-local remote = game.ReplicatedStorage:WaitForChild("Combat Event")
-local MuchachoHitbox = require(game.ServerStorage.modueles["MuchachoHitbox"])
+local remote = game.ReplicatedStorage:WaitForChild("CombatEvent")
+local HitService = require(game.ServerStorage.modules.HitService)
+local MuchachoHitbox = require(game.ServerStorage.modules["MuchachoHitbox"])
 local MaxCombo = 5
 
 game.Players.PlayerAdded:Connect(function(player)
@@ -34,15 +35,18 @@ remote.OnServerEvent:Connect(function(player)
 	local humanoid = character:WaitForChild("Humanoid")
 	local rootpart = humanoid.RootPart
 	local animator = humanoid.Animator
+	local stunned = character:GetAttribute("Stunned")
+	
 	
 	local combo = character:GetAttribute("Combo")
 	local attacking = character:GetAttribute("Attacking")
+	if attacking or stunned then return end
 	
 	if attacking then return end
 	character:SetAttribute("Attacking", true)
 	
 	
-	local animations = --This is where animations will go when finished
+	local animations = game.ReplicatedStorage["punch_anims"]:GetChildren()
 	local animation = animator:LoadAnimation(animations[combo])
 	
 	
@@ -50,7 +54,7 @@ remote.OnServerEvent:Connect(function(player)
 	hitbox.Size = Vector3.new(6,6,6)
 	hitbox.Offset = CFrame.new(0,0,-2.5)
 	hitbox.Cframe = rootpart
-	--hitbox.visualizer = false Leave TRUE For now while testing
+	hitbox.visualizer = true --Leave TRUE For now while testing
 	
 	animation.Stopped:Connect(function()
 		ComboReset(character, combo)
@@ -64,6 +68,19 @@ remote.OnServerEvent:Connect(function(player)
 	
 	hitbox.Touched:Connect(function(hit, hum)
 		if hum == humanoid then return end
+		local function fx()
+			local effectsFolder = game.ReplicatedStorage["fx folder"]
+			local attachment = Instance.new("Attachment")
+			attachment.Parent = hum.RootPart
+			
+			local particle = effectsFolder.hitfx:Clone()
+			particle.Parent = attachment
+			particle:Emit(5)
+			
+			local sound = effectsFolder.hitsfx:Clone()
+			sound.Parent = hum.RootPart
+			sound:Play()
+		end
 		hum:TakeDamage(5)
 	end)
 	animation:Play()
