@@ -37,3 +37,55 @@ function CreateKiBlastExplosion(fromPlayer, pos, color, damage)
 		rp.Events.KiBlast:FireServer(pos, damage)
 	end
 end
+
+function FXAdded(i)
+	
+	if i.Name == "Kiblast" then
+		
+		local att = CreateAttachment("Wave", i.CFrame * CFrame.Angles(math.rad(90),0,0), 0.5)
+		local wave = rp["Ki Blast"].Wave:Clone()
+		wave.Color = ColorSequence.new(i.Color)
+		wave.Parent = att
+		wave:Emit(1)
+		
+		local hitv = false
+		local p1 = i.Position
+		local p2 = i.CFrame * CFrame.new(0,0,-i:GetAttribute("Range")).p
+		local speed = i:GetAttribute("Speed")
+		local dist = (p1 - p2).Magnitude
+		local touchev
+		
+		touchev = i.Touched:Connect(function() end)
+		
+		local t = ts:Create(i, TweenInfo.new(dist/speed, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+			Position = p2
+		})
+		
+		t:Play()
+		
+		local ch = game.Players[i:GetAttribute("From")].Character
+		
+		while t.PlaybackState == Enum.PlaybackState.Playing do
+			
+			local touchingparts = i:GetTouchingParts()
+
+			for _,v in pairs(touchingparts) do
+				if not v:IsDescendantOf(ch) and not v:IsDescendantOf(workspace.FX) then					
+
+					hitv = true
+					
+					CreateKiBlastExplosion(i:GetAttribute("From"), 
+						i.Position, 
+						i.Color, 
+						i:GetAttribute("Damage")
+					)
+
+					t:Pause()
+					t:Destroy()
+					i:Destroy()
+					break
+				end
+			end
+			
+			task.wait()
+		end	
