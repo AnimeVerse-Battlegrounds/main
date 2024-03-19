@@ -1,0 +1,31 @@
+local Rp = game:GetService("ReplicatedStorage")
+local RS = game:GetService("RunService")
+local Bezier = require(game:GetService('ReplicatedStorage'):WaitForChild("KiBlast"):WaitForChild("BezierModule"))
+local RotatedRegion3 = require(game.ReplicatedStorage:WaitForChild("KiBlast"):WaitForChild("RotatedRegion3"))
+local folder = game.ReplicatedStorage:WaitForChild("KiBlast"):WaitForChild("Effects")
+
+local debounce = false
+local DMGperHit = 2
+local CD = 19
+script.Parent.OnServerEvent:Connect(function(plr,Mousehit)
+	local character = plr.Character
+	local humrp = character.HumanoidRootPart
+	local RightArm = character["Right Leg"]
+	if (humrp.Position - Mousehit).Magnitude <= 200 and debounce == false then
+		debounce = true
+		script.Parent.Parent.CoolDown:FireClient(plr,CD)
+		
+		character.Humanoid:LoadAnimation(folder.Animation):Play()
+		character.Humanoid.WalkSpeed = 7
+		character.Humanoid.JumpPower = 0
+		character.Humanoid.AutoRotate = false
+		for i = 1,10 do
+			local sound = folder.Beam:Clone()
+			sound.Parent = humrp
+			sound:Play()
+			game.Debris:AddItem(sound,2)
+
+			local sound = folder["Energy Aura"]:Clone()
+			sound.Parent = humrp
+			sound:Play()
+			game.Debris:AddItem(sound,2)
