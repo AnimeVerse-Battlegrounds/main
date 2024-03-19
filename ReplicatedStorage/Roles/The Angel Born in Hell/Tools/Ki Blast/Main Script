@@ -1,0 +1,45 @@
+local tool = script.Parent
+script:WaitForChild("RemoteEvent")
+local event = script.RemoteEvent
+local plr = game.Players.LocalPlayer
+
+repeat wait() until plr.Character
+
+local c = plr.Character
+c:WaitForChild("Humanoid")
+
+local hum = c.Humanoid
+local animations = {
+	"7324468364",
+	"7330078042"
+}
+
+local n = 1
+local ca = true
+
+function Activate()
+	if ca then
+		ca = false
+		
+		local t = Instance.new("Animation")
+		t.AnimationId = "rbxassetid://" .. animations[n]
+		local a = hum:LoadAnimation(t)
+		
+		a:Play()
+		a:AdjustSpeed(tool:GetAttribute("AttackSpeed"))
+		event:FireServer(n)
+		a.Stopped:Wait()
+		
+		if n == 2 then
+			n = 1 
+		else
+			n = n + 1
+		end
+		
+		wait(tool:GetAttribute("Cooldown"))
+		
+		ca = true
+	end
+end
+
+tool.Activated:Connect(Activate)
