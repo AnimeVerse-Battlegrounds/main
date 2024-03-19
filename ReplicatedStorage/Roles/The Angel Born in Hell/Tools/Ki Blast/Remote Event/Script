@@ -1,0 +1,40 @@
+local tool = script.Parent.Parent.Parent
+local rp = game:GetService("ReplicatedStorage")
+
+function Server(Player, n)
+	
+	local c = Player.Character
+	local hrp = c.HumanoidRootPart
+	local cf 
+	
+	if n == 1 then
+		cf = hrp.CFrame * CFrame.new(1.5,0,-2.5)
+	elseif n == 2 then
+		cf = hrp.CFrame * CFrame.new(-1.5,0,-2.5)
+	end
+	
+	local blast = rp["Ki Blast"].Kiblast:Clone()
+	
+	local s = rp["Ki Blast"].KiBlastS:Clone()
+	s.Parent = hrp
+	s:Play()
+	task.spawn(function()
+		wait(s.TimeLength)
+		s:Destroy()
+	end)
+	
+	blast:SetAttribute("From", Player.Name)
+	blast:SetAttribute("Range", tool:GetAttribute("Range"))
+	blast:SetAttribute("Speed", tool:GetAttribute("BlastSpeed"))
+	blast:SetAttribute("Damage", tool:GetAttribute("Damage"))
+	blast.BrickColor = tool:GetAttribute("BlastColor")
+	blast.CFrame = cf 
+	blast.Parent = workspace.FX
+	
+	task.spawn(function()
+		wait((blast.Position - blast.CFrame * CFrame.new(0,0,-tool:GetAttribute("Range")).p).Magnitude/tool:GetAttribute("BlastSpeed"))
+		blast:Destroy()	
+	end)	
+end
+
+script.Parent.OnServerEvent:Connect(Server)
