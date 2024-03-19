@@ -61,3 +61,44 @@ script.Parent.OnServerEvent:Connect(function(plr,Mousehit)
 			RS.Heartbeat:Connect(function()
 				Star.CFrame = CFrame.lookAt(Star.Position,Mousehit)
 			end)
+
+			BezierCurve.Speed = 50
+			BezierCurve:Play(Test,character)
+			
+			BezierCurve.Completed:Connect(function()
+
+				Star.Anchored = true
+
+				local hitbox = game.ReplicatedStorage.KiBlast.HitBox:Clone()
+				hitbox.Parent = workspace
+				hitbox.CFrame = Star.CFrame
+				game.Debris:AddItem(hitbox,.2)
+
+
+				local StartTick = tick()
+
+				local Damaged = {}
+				coroutine.resume(coroutine.create(function()
+					while tick() - StartTick <= .2 do
+						for _,eChar in pairs(workspace:GetChildren()) do
+							local eHumrp = eChar:FindFirstChild("HumanoidRootPart")
+							local eHum =  eChar:FindFirstChild("Humanoid")
+							if not (eHum) then continue end
+							local Box = RotatedRegion3.FromPart(hitbox)
+							if (eHumrp and eHum and Box:CastPart(eHumrp))  and eHumrp.Parent ~= character and table.find(Damaged,eChar)== nil then
+								table.insert(Damaged,1,eChar)
+
+								eHum.WalkSpeed = 5
+								eHum.JumpPower = 0
+								delay(1,function()
+									eHum.WalkSpeed = game.StarterPlayer.CharacterWalkSpeed
+									eHum.JumpPower = game.StarterPlayer.CharacterJumpPower
+								end)
+								eHum:TakeDamage(DMGperHit)
+							end	
+						end
+						game:GetService("RunService").Heartbeat:Wait()
+
+					end
+
+				end))
