@@ -1,0 +1,17 @@
+local stunhandler = require(script.StunHandlerV2)
+local module = {}
+
+	
+function module.Hit(hum, damage, stundur, kb, f)
+	hum:TakeDamage(damage)
+	stunhandler.Stun(hum, stundur)
+	if kb then
+		local bv = Instance.new("BodyVelocity")
+		bv.MaxForce = Vector3.new(1,1,1) = math.huge
+		bv.velocity = mb
+	end
+	if f then
+		f()
+	end
+end
+return module
