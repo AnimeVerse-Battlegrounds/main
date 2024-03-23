@@ -1,0 +1,21 @@
+local combatRemote = game ReplicatedStorage:waitForChild("CombatEvent")
+local blockRemote = game ReplicatedStorage:waitForChild("BlockEvent")
+local uis = game:GetService("UserInputService")
+
+uis.InputBegan:Connect(function(key, typing)
+	if typing then return end
+	
+	if key.UserInputType == Enum.UserInputType.MouseButton1 then
+		combatRemote:FireServer()
+	end
+	
+	if key.KeyCode == Enum.KeyCode.F then
+		blockRemote:FireServer(true)
+	end
+end)
+
+uis.InputEnded:Connect(function(key)
+	if key.KeyCode == Enum.KeyCode.F then
+		blockRemote:FireServer(false)
+	end
+end)
