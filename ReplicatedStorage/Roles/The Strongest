@@ -1,0 +1,148 @@
+local TS = game:GetService("TweenService")
+local RS = game:GetService("ReplicatedStorage")
+local SSS = game:GetService("ServerScriptService")
+local RockModule4 = require(RS.Modules.Rocks.RockModule4)
+local Rubble = require(RS.Modules.Rocks.Rubble)
+local ragdoll = require(RS.Modules.Ragdoll)
+local Damage = 25
+--
+script.Parent.OnServerEvent:Connect(function(p)
+	local Character = p.Character
+	local Humanoid = Character.Humanoid
+	local RootPart = Character.HumanoidRootPart
+	local Torso = Character.Torso
+	local Torso2 = script.Parent.Parent.Parent.Torso2
+	local anim = Humanoid:LoadAnimation(script.Anim)
+	local Sound1 = script.Parent.Parent.Parent.Torso2.ReversalRedVoiceline
+	local Sound2 = script.Parent.Parent.Parent.Torso2.Sound2
+	local Sound3 = script.Parent.Parent.Parent.Torso2.Sound3
+	local vel = Instance.new("BodyVelocity", RootPart)
+	vel.MaxForce = Vector3.new(1,1,1) * 1000000;
+	vel.Parent = RootPart
+	vel.Velocity = Vector3.new(1,1,1) * p.Character:WaitForChild("HumanoidRootPart").CFrame.LookVector * 0
+	vel.Name  =  "SmallMoveVel"
+	game.Debris:AddItem(vel,.2)
+	local BP = Instance.new("BodyPosition")
+	BP.D = 1000000
+	BP.P = 1000000
+	BP.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+	BP.Position = RootPart.Position + Vector3.new(0,0,0)
+	BP.Parent = RootPart
+	game.Debris:AddItem(BP,3)
+	anim:Play()
+	Sound1:Play()
+	task.wait(.87)
+	Sound3:Play()
+	task.wait(.2)
+	local Charge = script.Charge:Clone()
+	Charge.Parent = script.Parent.Parent.Parent.Handle2.Red
+	Charge.Enabled = true
+	game.Debris:AddItem(Charge,1.5)
+	game:GetService("TweenService"):Create(script.Parent.Parent.Parent.Handle2.Red.PointLight, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),{Brightness = 5} ):Play()
+	game:GetService("TweenService"):Create(script.Parent.Parent.Parent.Handle2.Red, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),{Transparency = 0} ):Play()
+	for _,Particles in pairs(script.Parent.Parent.Parent.Handle2.Red.Implosion:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end
+	for _,Particles in pairs(script.Parent.Parent.Parent.Handle2.Red.ChargeUp:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles.Enabled = true
+		end
+	end
+	local Aka = script.Aka:Clone()
+	Aka.Parent = Character
+	Aka.Enabled = true
+	game.Debris:AddItem(Aka,1.5)
+	task.wait(1)
+	game:GetService("TweenService"):Create(script.Parent.Parent.Parent.Handle2.Red.PointLight, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),{Brightness = 0} ):Play()
+	game:GetService("TweenService"):Create(script.Parent.Parent.Parent.Handle2.Red, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In),{Transparency = 1} ):Play()
+	for _,Particles in pairs(script.Parent.Parent.Parent.Handle2.Red.ChargeUp:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles.Enabled = false
+		end
+	end
+	task.wait(.2)
+	Sound2:Play()
+	local Shakes = script.ShakeScript:Clone()
+	Shakes.Parent = Character
+	Shakes.Enabled = true
+	game.Debris:AddItem(Shakes,.2)
+	spawn(function()
+		for i = 1,2 do
+
+			local part = Instance.new("Part", workspace.Ignore)
+			part.Position = RootPart.Position
+			part.Orientation = Vector3.new(0,math.random(-360,360),0)
+			part.Size = Vector3.new(1,1,1)
+			part.Anchored = true
+			part.CanCollide = false
+			part.Transparency = 1
+
+			local part2 = Instance.new("Part", workspace.Ignore)
+			part2.Position = RootPart.Position
+			part2.Orientation = part.Orientation + Vector3.new(0,-20,0)
+			part2.Size = Vector3.new(1,1,1)
+			part2.Anchored = true
+			part2.CanCollide = false
+			part2.Transparency = 1
+
+			game.Debris:AddItem(part2,1)
+
+			local part3 = Instance.new("Part", workspace.Ignore)
+			part3.Position = RootPart.Position
+			part3.Orientation = part2.Orientation + Vector3.new(0,20,0)
+			part3.Size = Vector3.new(1,1,1)
+			part3.Anchored = true
+			part3.CanCollide = false
+			part3.Transparency = 1
+
+			game.Debris:AddItem(part3,1)
+
+			RockModule4.RayCastEffect(part, 3, 20, 160, 5, 5,7, 20, 10, -7)
+			RockModule4.RayCastEffect(part2, 3, 15, 160, 5, 5, 6, 20, 10, -6)
+			RockModule4.RayCastEffect(part3, 3, 12, 160, 4, 4, 5, 20, 10, -6)
+
+			Rubble.RayCastEffect(RootPart, 4, 60, 60)
+
+			task.wait(0)
+		end
+	end)
+	anim:Stop()
+	for _,Particles in pairs(script.Parent.Parent.Parent.Handle2.Red.Blast:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end
+	for _,Particles in pairs(script.Parent.Parent.Parent.Torso2.Exp:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end
+	local Hitbox = RS.Red.Hitbox2:Clone()
+	game.Debris:AddItem(Hitbox,.1)
+	Hitbox.Transparency = 1
+	Hitbox.Parent = workspace.Effects
+	Hitbox.CFrame = RootPart.CFrame * CFrame.new(0,0,0)
+	local hitcontent = workspace:GetPartBoundsInBox(Hitbox.CFrame, Vector3.new(40, 40, 40))
+	local hitlist = {}
+	for _,v in pairs(hitcontent) do
+		if v.Parent:FindFirstChild("Humanoid") and v.Parent ~= Character and v.Parent.HumanoidRootPart.Anchored == false then
+			if not hitlist[v.Parent.Humanoid] and v.Parent.Humanoid.Health >= .1 then
+				hitlist[v.Parent.Humanoid] = true
+				v.Parent.Humanoid:TakeDamage(Damage) -- Damage
+				local RootPart2 = v.Parent.HumanoidRootPart	
+				ragdoll.StartRagdoll(v.Parent)
+				local vel = Instance.new("BodyVelocity", v.Parent.Torso)
+				vel.MaxForce = Vector3.new(1,1,1) * 1000000;
+				vel.Parent = v.Parent.Torso
+				vel.Velocity = Vector3.new(1,1,1) * p.Character:WaitForChild("HumanoidRootPart").CFrame.LookVector * 200
+				vel.Name  =  "SmallMoveVel"
+				game.Debris:AddItem(vel,.2)
+				task.delay(1,function()
+					ragdoll.EndRagdoll(v.Parent)
+				end)
+			end
+		end
+	end
+end)
