@@ -1,0 +1,39 @@
+script.Parent.OnServerEvent:Connect(function(plr)
+	local Projectile = game.ReplicatedStorage.Asset.Blue:Clone()
+	Projectile.Parent = workspace
+	Projectile.CanCollide = false
+	Projectile.Anchored = false
+	Projectile.CFrame = plr.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-1.5) * CFrame.fromEulerAnglesXYZ(0,0,45.56)
+	Projectile.Start:Play()
+	Projectile.Touched:Connect(function(hit)
+		if hit.Parent:FindFirstChild("Humanoid") and hit.Parent.Name ~= plr.Name then
+			local HitEffect = game.ReplicatedStorage.Asset.BlueHit:Clone()
+			HitEffect.Parent = workspace
+			HitEffect.CFrame = hit.CFrame
+			HitEffect.CanCollide = false
+			HitEffect.Anchored = true
+			HitEffect.Explosion11:Play()
+			Projectile:Destroy()
+			hit.Parent.Humanoid:TakeDamage(10)	 -- Damage
+			hit.Parent.Humanoid.WalkSpeed = 2 -- Stun Time
+			wait(1)
+			hit.Parent.Humanoid.WalkSpeed = 16
+			for i = 1,18 do
+				wait(.05)
+				HitEffect.Size = HitEffect.Size + Vector3.new(2,2,2)
+				HitEffect.Transparency = HitEffect.Transparency + 0.1
+			end	
+			HitEffect:Destroy()	
+		end
+	end)
+	local BV = Instance.new("BodyVelocity",Projectile)
+	BV.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+	BV.Velocity = plr.Character.HumanoidRootPart.CFrame.LookVector * 100
+	Projectile.Lightning:Emit(8)
+	Projectile.Lightning1:Emit(8)
+	Projectile.SPe:Emit(10)
+	Projectile.SPe1:Emit(10)
+	Projectile.Star:Emit(5)
+	wait(.01)
+    Projectile:Destroy()
+    end)
