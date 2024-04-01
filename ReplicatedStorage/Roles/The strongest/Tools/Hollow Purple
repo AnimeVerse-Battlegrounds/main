@@ -1,0 +1,32 @@
+while true do
+	wait(0.1)
+	if script.Parent.Size.Y == 5 then
+		for i,v in pairs(script.Parent.SmallParticles:GetChildren()) do
+			v.Enabled = false
+		end
+		for i,v in pairs(script.Parent.Particles:GetChildren()) do
+			v.Enabled = true
+		end
+	else
+		script.Parent.SmallParticles.P1.Size = NumberSequence.new(script.Parent.Size.Y/2)
+		script.Parent.SmallParticles.P2.Size = NumberSequence.new(script.Parent.Size.Y/2)
+		script.Parent.SmallParticles.P3.Size = NumberSequence.new(script.Parent.Size.Y/2)
+		script.Parent.SmallParticles.P4.Size = NumberSequence.new(script.Parent.Size.Y/2)
+	end
+end
+
+while true do
+	wait(0.5)
+	if script.Parent.Parent.Parent == workspace then
+		wait(13)
+		script.Parent.barrage.Enabled = true
+		script.Parent.barrage2.Enabled = true
+		script.Parent.particles.Enabled = true
+	end
+end
+
+script.Parent.Touched:Connect(function(hit)
+	if hit.Parent:FindFirstChild("Humanoid") ~= nil then
+		hit.Parent:FindFirstChild("Humanoid"):TakeDamage(72) -- Damage
+	end
+end)
