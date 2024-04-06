@@ -1,0 +1,48 @@
+local TweenService = game:GetService("TweenService")
+game.ReplicatedStorage.SpiritBomb.OnServerEvent:Connect(function(plr,mouse)
+ 
+ local animation = plr.Character.Humanoid:LoadAnimation(script:WaitForChild("Animation"))
+ animation:Play()
+ 
+ plr.Character.Humanoid.WalkSpeed = 0
+ 
+ local spiritbomb = game.ReplicatedStorage.KiAttacks.SpiritB:Clone()
+ spiritbomb.Anchored = true
+spiritbomb.CanCollide = false
+ spiritbomb.Parent = plr.Character
+ spiritbomb.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0,15,0)
+ game.Debris:AddItem(spiritbomb,7)
+ 
+
+ local sound = game.ReplicatedStorage.Sounds.Charge:Clone()
+ sound.Parent = spiritbomb
+ sound:Play()
+
+
+ local tweenInfo = TweenInfo.new(
+  4, -- Time
+  Enum.EasingStyle.Linear, -- EasingStyle
+  Enum.EasingDirection.Out, -- EasingDirection
+  0, -- RepeatCount (when less than zero the tween will loop indefinitely)
+  false, -- Reverses (tween will reverse once reaching it's goal)
+  0 -- DelayTime
+ )
+
+ local tween = TweenService:Create(spiritbomb, tweenInfo, {Size = Vector3.new(15,15,15)})
+
+ tween:Play()
+ 
+ wait(4)
+ animation:Stop()
+ 
+ local Throwanimaiton = plr.Character.Humanoid:LoadAnimation(script:WaitForChild("Throw"))
+ Throwanimaiton:Play()
+ spiritbomb.Anchored = false
+ 
+ spiritbomb.CFrame = CFrame.new(spiritbomb.CFrame.p, mouse)
+
+ local bodyvel = Instance.new("BodyVelocity")
+ bodyvel.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+ bodyvel.P = math.huge
+ bodyvel.Velocity = spiritbomb.CFrame.LookVector * 45
+ bodyvel.Parent = spiritbomb
