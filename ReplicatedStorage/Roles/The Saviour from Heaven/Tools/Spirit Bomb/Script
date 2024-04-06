@@ -46,3 +46,41 @@ spiritbomb.CanCollide = false
  bodyvel.P = math.huge
  bodyvel.Velocity = spiritbomb.CFrame.LookVector * 45
  bodyvel.Parent = spiritbomb
+sound:Stop()
+ plr.Character.Humanoid.WalkSpeed = 16
+ 
+ local cantouch = true
+ spiritbomb.Touched:Connect(function(hit)
+  if hit.Parent.Name == plr.Name then return end
+  if cantouch == true and hit.Parent:WaitForChild("Humanoid")  then
+   hit.Parent.Humanoid.Health -=50
+   cantouch = false
+   
+   spiritbomb.Anchored = true
+   
+   local sound = game.ReplicatedStorage.Sounds.Explode:Clone()
+   sound.Parent = spiritbomb
+   sound:Play()
+   
+   TweenService:Create(spiritbomb,TweenInfo.new(.5,0,0),{Transparency = 1,Size = Vector3.new(20,20,20)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()--we are making an animation with the ring and playing it
+
+   local wave = game.ReplicatedStorage.KiAttacks.Wave:Clone()
+   wave.Position = hit.Parent.HumanoidRootPart.Position + Vector3.new(0,-2,0)
+   wave.Parent = game.Workspace
+   game.Debris:AddItem(wave,1)
+   
+   TweenService:Create(wave,TweenInfo.new(.5,0,0),{Transparency = 1,Size = Vector3.new(20.775, 2.3, 20.505)},Enum.EasingStyle.Quint,Enum.EasingDirection.Out):Play()--we are making an animation with the ring and playing it
+
+   
+   local bodyvel = Instance.new("BodyVelocity")
+   bodyvel.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+   bodyvel.P = math.huge
+   bodyvel.Velocity = hit.Parent.HumanoidRootPart.CFrame.LookVector * -55
+   bodyvel.Parent = hit.Parent.HumanoidRootPart
+   game.Debris:AddItem(bodyvel,1)
+   
+  end
+ end)
+ 
+ cantouch = true
+end)
