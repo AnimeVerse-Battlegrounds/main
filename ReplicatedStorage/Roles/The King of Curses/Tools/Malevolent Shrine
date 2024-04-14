@@ -294,3 +294,65 @@ Remote.OnServerEvent:Connect(function(Player,Event,Key)
 				end)
 			end
 		end)
+		if Moveable == false then
+			Humanoid.WalkSpeed = SavedWalkSpeed
+			Humanoid.JumpPower = SavedJumpPower
+			Humanoid.JumpHeight = SavedJumpHeight
+
+			Action:Stop()
+			Root.Anchored = false
+			Humanoid.AutoRotate = true
+		end
+
+		Shrine.Shrine.Saw:Stop()
+
+		local Goal = {
+			Brightness = 0,
+			Contrast = 0,
+			TintColor = Color3.fromRGB(255, 255, 255)
+		}
+		local Info = TweenInfo.new(1,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Slashing,Info,Goal)
+		Tween:Play()
+		Tween.Completed:Connect(function()
+			Slashing:Destroy()
+		end)
+
+		Shrine.Highlight.FillColor = Color3.fromRGB(0, 0, 0)
+		local Goal = {
+			OutlineTransparency = 0,
+			FillTransparency = 0,
+		}
+		local Info = TweenInfo.new(2,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Shrine.Highlight,Info,Goal)
+		Tween:Play()
+
+		for _, part in pairs(Shrine:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+
+		local Goal = {
+			Volume = 0
+		}
+		local Info = TweenInfo.new(1,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Shrine.Shrine.OST,Info,Goal)
+		Tween:Play()
+
+		local Goal = {
+			CFrame = SavedCF * CFrame.new(0,-30,12)
+		}
+		local Info = TweenInfo.new(2,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Shrine.Shrine,Info,Goal)
+		Tween:Play()
+		Tween.Completed:Connect(function()
+			Shrine:Destroy()
+		end)
+
+		task.delay(Cooldown,function()
+			CollectionService:RemoveTag(Character,"MalevolentShrineCD")
+		end)
+
+	end
+end)
