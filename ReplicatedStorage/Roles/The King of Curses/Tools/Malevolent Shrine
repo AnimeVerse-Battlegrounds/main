@@ -170,3 +170,127 @@ Remote.OnServerEvent:Connect(function(Player,Event,Key)
 		repeat
 
 			local Hitted = {}
+			local Hitbox = workspace:GetPartBoundsInBox(Shrine.Shrine.CFrame,HitboxRange)
+			for i,a in pairs(Hitbox) do
+				if a.Parent:FindFirstChild("Humanoid") and a.Parent:FindFirstChild("HumanoidRootPart") then
+					local Enemy = a.Parent
+					local EnemyHumanoid = Enemy:FindFirstChild("Humanoid")
+					local EnemyRoot = Enemy:FindFirstChild("HumanoidRootPart")
+					if Hitted[EnemyHumanoid] == nil then
+						Hitted[EnemyHumanoid] = true
+
+						if Enemy ~= Character then
+							EnemyHumanoid:TakeDamage(Damage)
+						end
+
+						local IsPlayer = game:GetService("Players"):GetPlayerFromCharacter(Enemy)
+						if IsPlayer then
+							Remote:FireClient(IsPlayer,"CameraShake",{4,50,0,0.15})
+						end
+					end
+				end
+				if a:IsA("BasePart") and CollectionService:HasTag(a,"Destroyable") and not CollectionService:HasTag(a,"Regen") then
+					if not DestroyedPart[a] and not a:IsDescendantOf(DestroyedFolder) then
+						DestroyedPart[a] = {
+							["Part"] = a,
+							["Parent"] = a.Parent,
+							["Transparency"] = a.Transparency,
+						}
+					end
+
+					if a.Size.X >= 1 and a.Size.Y >= 1 and a.Size.Z >= 1 then
+						local Cloned = a:Clone()
+						Cloned.Parent = DestroyedFolder
+						Cloned.Size = Vector3.new(a.Size.X/1.1,a.Size.Y/1.1,a.Size.Z/1.1)
+						Cloned.CFrame = a.CFrame
+						Cloned.Anchored = false
+						Cloned.CanCollide = true
+					end
+
+					a:Destroy()
+
+				end
+			end
+
+			for i = 1,SlashPerRound do
+				Remote:FireAllClients("Slashes",{
+					["Parent"] = SlashesFolder,
+					["CFrame"] = Shrine.Shrine.CFrame * CFrame.new(rng(-VisualRange/2,VisualRange/2),0,rng(-VisualRange/2,VisualRange/2)) * CFrame.fromEulerAnglesXYZ(rng(-180,180),0,rng(-180,180)),
+				})
+			end
+			
+			local Divined = 1
+			
+			if Rock == 2 then
+				Divined = 1
+			elseif Rock == 1 then
+				Divined = 2
+			end
+			
+			if Rock ~= 0 then
+				Remote:FireAllClients("RayCastRock",{
+					["User"] = Character,
+					["Type"] = "PebbleFly",
+					["Loop"] = rng(10,15)/Divined,
+					["Parent"] = RockFolder,
+					["DespawnTime"] = 1,
+					["DelayTime"] = 3,
+					["Part"] = Shrine.Shrine,
+					["Force"] = rng(40,100),
+					["RayCast"] = {
+						["RayRange"] = -20,
+						["RayDistanceAway"] = VisualRange/2,
+						["RaySize"] = Vector3.new(rng(2,5),rng(2,5),rng(2,5)),
+					},
+				})
+
+				Remote:FireAllClients("RayCastRock",{
+					["User"] = Character,
+					["Type"] = "PebbleFly",
+					["Loop"] = rng(15,20)/Divined,
+					["Parent"] = RockFolder,
+					["DespawnTime"] = 1,
+					["DelayTime"] = 3,
+					["Part"] = Shrine.Shrine,
+					["Force"] = rng(60,120),
+					["RayCast"] = {
+						["RayRange"] = -20,
+						["RayDistanceAway"] = VisualRange/2,
+						["RaySize"] = Vector3.new(1,1,1),
+					},
+				})
+			end
+			
+			if Humanoid.Health <= 0 or Character.Parent == nil then
+				break
+			end
+
+			task.wait(0.05)
+
+		until tick() - Start >= Duration
+
+		CollectionService:RemoveTag(Character,"Attacking")
+
+		Debris:AddItem(FXFolder,5)
+
+		DestroyedFolder:Destroy()
+
+		task.delay(10,function()
+			for i, a in pairs(DestroyedPart) do
+				local Cloned = a.Part:Clone()
+				Cloned.Transparency = 1
+				Cloned.Parent = a.Parent
+
+				CollectionService:AddTag(Cloned,"Regen")
+
+				local Goal = {
+					Transparency = a.Transparency,
+				}
+				local Info = TweenInfo.new(1,Enum.EasingStyle.Sine)
+				local Tween = TweenService:Create(Cloned,Info,Goal)
+				Tween:Play()
+				Tween.Completed:Connect(function()
+					CollectionService:RemoveTag(Cloned,"Regen")
+				end)
+			end
+		end)
