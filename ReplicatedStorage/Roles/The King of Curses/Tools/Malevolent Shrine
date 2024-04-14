@@ -1,0 +1,74 @@
+local CollectionService = game:GetService('CollectionService')
+local Remote = game:GetService("ReplicatedStorage"):WaitForChild("MalevolentShrine")
+local TweenService = game:GetService('TweenService')
+local Debris = game:GetService("Debris")
+local CollectionService = game:GetService('CollectionService')
+local Assets = script:WaitForChild("Assets")
+local Setting = require(script:WaitForChild("Setting"))
+
+local rng = math.random
+local rad = math.rad
+local angle = CFrame.fromEulerAnglesXYZ
+
+Remote.OnServerEvent:Connect(function(Player,Event,Key)
+	local Character = Player.Character
+	local Humanoid = Character:WaitForChild("Humanoid")
+	local Root = Character:WaitForChild("HumanoidRootPart")
+
+	if not CollectionService:HasTag(Character,"Attacking") and not CollectionService:HasTag(Character,"MalevolentShrineCD") then
+
+		CollectionService:AddTag(Character,"Attacking")
+		CollectionService:AddTag(Character,"MalevolentShrineCD")
+
+		local SavedWalkSpeed = Humanoid.WalkSpeed
+		local SavedJumpPower = Humanoid.JumpPower
+		local SavedJumpHeight = Humanoid.JumpHeight
+
+		local Cooldown = Setting["Cooldown"]
+		local Duration = Setting["Duration"]
+		local HitboxRange = Setting["HitboxRange"]
+		local VisualRange = Setting["VisualRange"]
+		local Damage = Setting["Damage"]
+		local Moveable = Setting["Moveable"]
+		local SlashPerRound = Setting["SlashPerRound"]
+		local Rock = Setting["Rock"]
+
+		local Overhead = Assets["VFX"]["Part"]["Overhead"]:Clone()
+		Overhead.Parent = Root
+
+		Humanoid.AutoRotate = false
+		Humanoid.WalkSpeed = 0
+		Humanoid.JumpPower = 0
+		Humanoid.JumpHeight = 0
+
+		local FXFolder = Instance.new("Folder",workspace)
+		FXFolder.Name = "MalShrine"
+		Debris:AddItem(FXFolder,Duration+10)
+
+		local RockFolder = Instance.new("Folder",FXFolder)
+		RockFolder.Name = "Rocks"
+
+		local SlashesFolder = Instance.new("Model",FXFolder)
+		SlashesFolder.Name = "Slashes"
+
+		local DestroyedFolder = Instance.new("Folder",FXFolder)
+		DestroyedFolder.Name = "DestroyedFolder"
+
+		local Highlight = Instance.new("Highlight",SlashesFolder)
+		Highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+		Highlight.FillColor = Color3.new(0, 0, 0)
+		Highlight.OutlineTransparency = 1
+		Highlight.FillTransparency = 0
+
+		local Voice = Assets["SFX"]["Voice"]:Clone()
+		Voice.Parent = Root
+		Voice.RollOffMaxDistance = VisualRange/2
+		Voice:Play()
+		Debris:AddItem(Voice,Voice.TimeLength+0.2)
+
+		local Action = Humanoid:LoadAnimation(Assets["Animations"]["Standing"])
+		Action:Play(0.1,1,1)
+
+		Action:GetMarkerReachedSignal("Stop"):Connect(function()
+			Action:AdjustSpeed(0)
+		end)
