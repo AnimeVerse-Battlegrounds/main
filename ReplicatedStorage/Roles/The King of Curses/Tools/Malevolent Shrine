@@ -72,3 +72,101 @@ Remote.OnServerEvent:Connect(function(Player,Event,Key)
 		Action:GetMarkerReachedSignal("Stop"):Connect(function()
 			Action:AdjustSpeed(0)
 		end)
+		spawn(function()
+
+			local Hitted = {}
+
+			local Hitbox = workspace:GetPartBoundsInBox(Root.CFrame,HitboxRange)
+			for i,a in pairs(Hitbox) do
+				if a.Parent:FindFirstChild("Humanoid") and a.Parent:FindFirstChild("HumanoidRootPart") then
+					local Enemy = a.Parent
+					local EnemyHumanoid = Enemy:FindFirstChild("Humanoid")
+					local EnemyRoot = Enemy:FindFirstChild("HumanoidRootPart")
+					if Hitted[EnemyHumanoid] == nil then
+						Hitted[EnemyHumanoid] = true
+
+						local IsPlayer = game:GetService("Players"):GetPlayerFromCharacter(Enemy)
+						if IsPlayer then
+							spawn(function()
+								Remote:FireClient(IsPlayer,"Cutscene",{1,Character})
+								task.wait(3.25)
+								Remote:FireClient(IsPlayer,"Cutscene",{2,Character})
+							end)
+						end
+					end
+				end
+			end
+		end)
+
+		task.wait(1)
+
+		Overhead:Destroy()
+
+		Root.Anchored = true
+
+		local Shrine = Assets["VFX"]["Shrine"]:Clone()
+		Shrine.Parent = FXFolder
+
+		Shrine.Shrine.OST.RollOffMaxDistance = VisualRange/2
+		Shrine.Shrine.Saw.RollOffMaxDistance = VisualRange/2
+
+		Shrine:SetPrimaryPartCFrame(Root.CFrame * CFrame.new(0,-20,12))
+
+		local Goal = {
+			CFrame = Root.CFrame * CFrame.new(0,13,12)
+		}
+		local Info = TweenInfo.new(2,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Shrine.Shrine,Info,Goal)
+		Tween:Play()
+
+		local Goal = {
+			CFrame = Root.CFrame * CFrame.new(0,6,0)
+		}
+		local Info = TweenInfo.new(2,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Root,Info,Goal)
+		Tween:Play()
+
+		task.wait(2.25)
+
+		local Goal = {
+			FillTransparency = 1,
+		}
+		local Info = TweenInfo.new(1,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Shrine.Highlight,Info,Goal)
+		Tween:Play()
+
+		task.wait(0.76)
+
+		local Slashing = Instance.new("ColorCorrectionEffect",game.Lighting)
+
+		local Goal = {
+			Brightness = -0.3,
+			Contrast = 0.2,
+			TintColor = Color3.fromRGB(255, 181, 181)
+		}
+		local Info = TweenInfo.new(1,Enum.EasingStyle.Sine)
+		local Tween = TweenService:Create(Slashing,Info,Goal)
+		Tween:Play()
+
+		Shrine.Shrine.OST:Play()
+		Shrine.Shrine.Saw:Play()
+		
+		local SavedCF = Root.CFrame
+		
+		if Moveable == true then
+			Humanoid.WalkSpeed = SavedWalkSpeed
+			Humanoid.JumpPower = SavedJumpPower
+			Humanoid.JumpHeight = SavedJumpHeight
+
+			Action:Stop()
+			Root.Anchored = false
+			Humanoid.AutoRotate = true
+		end
+
+		local Start = tick()
+
+		local DestroyedPart = {}
+
+		repeat
+
+			local Hitted = {}
