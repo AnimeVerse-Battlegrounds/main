@@ -1,32 +1,154 @@
-while true do
-	wait(0.1)
-	if script.Parent.Size.Y == 5 then
-		for i,v in pairs(script.Parent.SmallParticles:GetChildren()) do
-			v.Enabled = false
-		end
-		for i,v in pairs(script.Parent.Particles:GetChildren()) do
-			v.Enabled = true
-		end
-	else
-		script.Parent.SmallParticles.P1.Size = NumberSequence.new(script.Parent.Size.Y/2)
-		script.Parent.SmallParticles.P2.Size = NumberSequence.new(script.Parent.Size.Y/2)
-		script.Parent.SmallParticles.P3.Size = NumberSequence.new(script.Parent.Size.Y/2)
-		script.Parent.SmallParticles.P4.Size = NumberSequence.new(script.Parent.Size.Y/2)
-	end
-end
+local p = game.Players.LocalPlayer
+repeat wait() until p.Character
 
-while true do
-	wait(0.5)
-	if script.Parent.Parent.Parent == workspace then
-		wait(13)
-		script.Parent.barrage.Enabled = true
-		script.Parent.barrage2.Enabled = true
-		script.Parent.particles.Enabled = true
-	end
-end
+local uis = game:GetService("UserInputService")
 
-script.Parent.Touched:Connect(function(hit)
-	if hit.Parent:FindFirstChild("Humanoid") ~= nil then
-		hit.Parent:FindFirstChild("Humanoid"):TakeDamage(72) -- Damage
+local db = false
+local Cooldown = 20 -- change the cooldowns whatever you want
+
+script.Parent.Activated:Connect(function()
+	if db == false then
+		db = true
+		script.Event:FireServer()
+		game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+		wait(4.4)
+		game.Lighting.Purple.Enabled = true
+
+		local duration = 4 -- Duración total en segundos
+		local steps = 0.05 -- Incremento para cada paso
+		local totalSteps = duration / steps -- Número total de pasos
+
+		local contrastStep = 2 / totalSteps
+		local saturationStep = 1 / totalSteps
+		local BrightnessStep = 0 / totalSteps
+
+		for i = 0, totalSteps do
+			game.Lighting.Purple.Contrast = i * contrastStep
+			game.Lighting.Purple.Saturation = i * saturationStep
+			game.Lighting.Purple.Brightness = i * BrightnessStep
+			wait(steps)
+		end
+		
+		
+		game.Lighting.Purple2.Enabled = true
+		game.Lighting.Purple.Enabled = false 
+
+		local duration = 0.05 -- Duración total en segundos
+		local steps = 0.1 -- Incremento para cada paso
+		local totalSteps = duration / steps -- Número total de pasos
+
+		local contrastStep = 0 / totalSteps
+		local saturationStep = 0 / totalSteps
+		local BrightnessStep = 0 / totalSteps
+
+		for i = 0, totalSteps do
+			game.Lighting.Purple.Contrast = i * contrastStep
+			game.Lighting.Purple.Saturation = i * saturationStep
+			game.Lighting.Purple.Brightness = i * BrightnessStep
+			wait(steps)
+		end
+		
+		game.Lighting.Purple3.Enabled = true 
+		
+		game.Lighting.Purple2.Enabled = false 
+
+		local duration = 0.05 -- Duración total en segundos
+		local steps = 0.1 -- Incremento para cada paso
+		local totalSteps = duration / steps -- Número total de pasos
+
+		local contrastStep = 0 / totalSteps
+		local saturationStep = 0 / totalSteps
+		local BrightnessStep = 0 / totalSteps
+
+		for i = 0, totalSteps do
+			game.Lighting.Purple.Contrast = i * contrastStep
+			game.Lighting.Purple.Saturation = i * saturationStep
+			game.Lighting.Purple.Brightness = i * BrightnessStep
+			wait(steps)
+		end
+
+		game.Lighting.Purple4.Enabled = true 
+		game.Lighting.Purple3.Enabled = false
+		
+		game.Lighting.Purple41.Enabled = true 
+
+
+		local duration = 0.05 -- Duración total en segundos
+		local steps = 0.1 -- Incremento para cada paso
+		local totalSteps = duration / steps -- Número total de pasos
+
+		local contrastStep = 0 / totalSteps
+		local saturationStep = 0 / totalSteps
+		local BrightnessStep = 0 / totalSteps
+
+		for i = 0, totalSteps do
+			game.Lighting.Purple.Contrast = i * contrastStep
+			game.Lighting.Purple.Saturation = i * saturationStep
+			game.Lighting.Purple.Brightness = i * BrightnessStep
+			wait(steps)
+		end
+		
+		
+		
+		game.Lighting.Purple41.Enabled = false 
+		
+		game.Lighting.Purple4.Enabled = true 
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -1
+		game.Lighting.Purple4.Brightness = 1
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.9
+		game.Lighting.Purple4.Brightness = 0.9
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.8
+		game.Lighting.Purple4.Brightness = 0.8
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.7
+		game.Lighting.Purple4.Brightness = 0.7
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.6
+		game.Lighting.Purple4.Brightness = 0.6
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.5
+		game.Lighting.Purple4.Brightness = 0.5
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.4
+		game.Lighting.Purple4.Brightness = 0.4
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.3
+		game.Lighting.Purple4.Brightness = 0.3
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.2
+		game.Lighting.Purple4.Brightness = 0.2
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = -0.1
+		game.Lighting.Purple4.Brightness = 0.1
+		wait(0.01)
+		game.Lighting.Purple4.Contrast = 0
+		game.Lighting.Purple4.Brightness = 0
+		
+
+		game.Lighting.Purple4.Enabled = false
+		
+		
+		game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
+		wait(Cooldown)
+		db = false
 	end
 end)
+
+
+local Tool = script.Parent  
+Char = Tool.Parent.Parent.Character 
+
+function onDeath()
+
+	Tool:Destroy()
+	game.Lighting.Atmosphere.Density = .3
+	game.Lighting.Atmosphere.Haze = 0
+	game.Lighting.ClockTime = 14.5
+	game.Lighting.Purple.Enabled = false
+	game:GetService('StarterGui'):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)
+end
+
+Char.Humanoid.Died:connect(onDeath)
