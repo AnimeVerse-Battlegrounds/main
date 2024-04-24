@@ -1,0 +1,23 @@
+local player = game.Players.LocalPlayer
+local RS = game:GetService("ReplicatedStorage")
+local UIS = game:GetService("UserInputService")
+local cooldown = false
+Mouse = player:GetMouse()
+
+UIS.InputBegan:Connect(function(Input, Chat)
+	local Character = player.Character
+	if Chat then return end
+	if cooldown then return end
+	if Input.KeyCode == Enum.KeyCode.E then
+		cooldown = true
+		print("test")
+		local mousepos = Mouse.Hit
+		RS.ThrowRemote:FireServer(mousepos, Mouse.Hit.p)
+		local Track = Instance.new("Animation")
+		Track.AnimationId = "rbxassetid://17277202078"
+		local Anim = Character.Humanoid:LoadAnimation(Track)
+		Anim:Play()
+		task.wait(3)
+		cooldown = false
+	end
+end)
