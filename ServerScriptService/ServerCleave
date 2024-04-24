@@ -1,0 +1,18 @@
+local RS = game:GetService("ReplicatedStorage")
+
+RS.ThrowRemote.OnServerEvent:Connect(function(plr)
+	print("changed")
+	local hrp = plr.Character.HumanoidRootPart
+	local beam3 = RS.Wave:Clone()
+	local infNum = math.huge
+	beam3.PrimaryPart.CFrame = CFrame.new((hrp.CFrame*CFrame.new(0, 2, 0)).Position, mouseaim)
+	beam3.Parent = workspace
+	
+	local BV3 = Instance.new("BodyVelocity", beam3.PrimaryPart)
+	BV3.MaxForce = Vector3.new(infNum,infNum,infNum)
+	BV3.Velocity = CFrame.new(hrp.Position, mouseaim).LookVector * 170
+	
+	local part5 = beam3.m1
+	local part6 = beam3.m2
+	
+end)
