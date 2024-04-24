@@ -1,39 +1,60 @@
-script.Parent.OnServerEvent:Connect(function(plr)
-	local Projectile = game.ReplicatedStorage.Asset.Blue:Clone()
-	Projectile.Parent = workspace
-	Projectile.CanCollide = false
-	Projectile.Anchored = false
-	Projectile.CFrame = plr.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,-1.5) * CFrame.fromEulerAnglesXYZ(0,0,45.56)
-	Projectile.Start:Play()
-	Projectile.Touched:Connect(function(hit)
-		if hit.Parent:FindFirstChild("Humanoid") and hit.Parent.Name ~= plr.Name then
-			local HitEffect = game.ReplicatedStorage.Asset.BlueHit:Clone()
-			HitEffect.Parent = workspace
-			HitEffect.CFrame = hit.CFrame
-			HitEffect.CanCollide = false
-			HitEffect.Anchored = true
-			HitEffect.Explosion11:Play()
-			Projectile:Destroy()
-			hit.Parent.Humanoid:TakeDamage(10)	 -- Damage
-			hit.Parent.Humanoid.WalkSpeed = 2 -- Stun Time
-			wait(1)
-			hit.Parent.Humanoid.WalkSpeed = 16
-			for i = 1,18 do
-				wait(.05)
-				HitEffect.Size = HitEffect.Size + Vector3.new(2,2,2)
-				HitEffect.Transparency = HitEffect.Transparency + 0.1
-			end	
-			HitEffect:Destroy()	
+local TS = game:GetService("TweenService")
+local RS = game:GetService("ReplicatedStorage")
+local SS = game:GetService("ServerStorage")
+local Assets = RS.BlueAssets
+--
+script.Parent.OnServerEvent:Connect(function(p)
+	local Character = p.Character
+	local Humanoid = Character.Humanoid
+	local RootPart = Character.HumanoidRootPart
+	local anim1 = Humanoid:LoadAnimation(script["1"])
+	local FX = Assets["Blue"]:Clone()
+	local RArmFX = Assets.RA.Emit:Clone()
+	local RArm = Character["Right Arm"]
+	RArmFX.Parent = RArm
+	Humanoid.WalkSpeed = 0
+	Humanoid.JumpPower = 0
+	Humanoid.JumpHeight = 0
+	FX.Parent = workspace.Effects
+	FX.CFrame = RootPart.CFrame * CFrame.new(0,2,-5)
+	anim1:Play()
+	wait(.5)
+	Humanoid.AutoRotate = false
+	FX.Parent = workspace.Effects
+	FX.CFrame = RootPart.CFrame * CFrame.new(0,-3,-25)
+	FX.Sound:Play()
+	local hitcontent = workspace:GetPartBoundsInBox(FX.CFrame, Vector3.new(18, 14.5, 52))
+	local hitlist = {}
+	for _,v in pairs(hitcontent) do
+		if v.Parent:FindFirstChild("Humanoid") and v.Parent ~= Character then
+			if not hitlist[v.Parent.Humanoid] then
+				hitlist[v.Parent.Humanoid] = true
+				local Tp = Assets["Root"]:Clone()
+				for _,Particles in pairs(RArmFX.Parent:GetDescendants()) do
+					if Particles:IsA("ParticleEmitter") then
+						Particles:Emit(Particles:GetAttribute("EmitCount"))
+					end
+				end	
+				local RootPart2 = v.Parent.HumanoidRootPart
+				Tp.Parent = RootPart2
+				Tp.Motor6D.Part1 = RootPart2
+				p.Character:MoveTo(Tp.TP.Position)
+				Tp:Destroy()
+				local vel = Instance.new("BodyVelocity", v.Parent.HumanoidRootPart)
+				vel.MaxForce = Vector3.new(1,1,1) * 1000000;
+				vel.Parent = v.Parent.HumanoidRootPart
+				vel.Velocity = Vector3.new(1,1,1) * p.Character:WaitForChild("HumanoidRootPart").CFrame.LookVector * 0
+				vel.Name  =  "SmallMoveVel"
+				game.Debris:AddItem(vel,0.1)
+			end
 		end
-	end)
-	local BV = Instance.new("BodyVelocity",Projectile)
-	BV.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
-	BV.Velocity = plr.Character.HumanoidRootPart.CFrame.LookVector * 100
-	Projectile.Lightning:Emit(8)
-	Projectile.Lightning1:Emit(8)
-	Projectile.SPe:Emit(10)
-	Projectile.SPe1:Emit(10)
-	Projectile.Star:Emit(5)
-	wait(.01)
-    Projectile:Destroy()
-    end)
+	end
+	wait(.5)
+	anim1:Stop()
+	Humanoid.AutoRotate = true
+	Humanoid.WalkSpeed = 16
+	Humanoid.JumpPower = 50
+	Humanoid.JumpHeight = 7.2
+	wait(3)
+	FX:Destroy()
+end)
