@@ -1,0 +1,111 @@
+local TS = game:GetService("TweenService")
+local RS = game:GetService("ReplicatedStorage")
+local SS = game:GetService("ServerStorage")
+local RockModule = require(SS.Modules.RockModule)
+local Assets = RS.RedAssets
+local Damage = 100
+--
+script.Parent.OnServerEvent:Connect(function(p)
+	local Character = p.Character
+	local Humanoid = Character.Humanoid
+	local RootPart = Character.HumanoidRootPart
+	local anim1 = Humanoid:LoadAnimation(script["1"])
+	local anim2 = Humanoid:LoadAnimation(script["2"])
+	local FX = Assets["Red"]:Clone()
+	local RArmFX = Assets.RA.Attachment:Clone()
+	local RArm = Character["Right Arm"]
+	RArmFX.Sound:Play()
+	RArmFX.Voice:Play()
+	RArmFX.Parent = RArm
+	Humanoid.WalkSpeed = 0
+	Humanoid.JumpPower = 0
+	Humanoid.JumpHeight = 0
+	local vel = Instance.new("BodyVelocity", RootPart)
+	vel.MaxForce = Vector3.new(1,1,1) * 1000000;
+	vel.Parent = RootPart
+	vel.Velocity = Vector3.new(1,1,1) * p.Character:WaitForChild("HumanoidRootPart").CFrame.LookVector * 0
+	vel.Name  =  "SmallMoveVel"
+	game.Debris:AddItem(vel,1)
+	FX.Parent = workspace.Effects
+	FX.CFrame = RootPart.CFrame * CFrame.new(0,2,-5)
+	anim1:Play()
+	wait(1.25)
+	Humanoid.AutoRotate = false
+	for _,Particles in pairs(RArmFX.Attachment.Parent:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles.Enabled = false
+		end
+	end
+	RArmFX.N.Enabled = true
+	RArmFX.N2.Enabled = true
+	RArmFX.N3.Enabled = true
+	wait(.5)
+	anim2:Play()
+	RArmFX:Destroy()
+	FX.Parent = workspace.Effects
+	FX.CFrame = RootPart.CFrame * CFrame.new(0,-3,-25)
+	FX.Sound:Play()
+	for _,Particles in pairs(FX.Red.Attachment:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end
+	for _,Particles in pairs(FX.Red.Attachment2:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end
+	for _,Particles in pairs(FX.Red.Explode:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end	
+	for _,Particles in pairs(FX.Red.Parent:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end
+	for _,Particles in pairs(FX.Red.FX:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end	
+	for _,Particles in pairs(FX.Red.FX2:GetDescendants()) do
+		if Particles:IsA("ParticleEmitter") then
+			Particles:Emit(Particles:GetAttribute("EmitCount"))
+		end
+	end	
+	local hitcontent = workspace:GetPartBoundsInBox(FX.CFrame, Vector3.new(18, 14.5, 52))
+	local hitlist = {}
+	for _,v in pairs(hitcontent) do
+		if v.Parent:FindFirstChild("Humanoid") and v.Parent ~= Character then
+			if not hitlist[v.Parent.Humanoid] then
+				hitlist[v.Parent.Humanoid] = true
+				v.Parent.Humanoid:TakeDamage(Damage)
+				local vel = Instance.new("BodyVelocity", v.Parent.HumanoidRootPart)
+				vel.MaxForce = Vector3.new(1,1,1) * 1000000;
+				vel.Parent = v.Parent.HumanoidRootPart
+				vel.Velocity = Vector3.new(1,1,1) * p.Character:WaitForChild("HumanoidRootPart").CFrame.LookVector * 180
+				vel.Name  =  "SmallMoveVel"
+				game.Debris:AddItem(vel,0.1)
+				local HitFX = Assets.HitFX.Attach:Clone()
+				HitFX.Parent = v.Parent.HumanoidRootPart
+				for _,Particles in pairs(HitFX:GetDescendants()) do
+					if Particles:IsA("ParticleEmitter") then
+						Particles:Emit(Particles:GetAttribute("EmitCount"))
+					end
+				end
+				game.Debris:AddItem(HitFX,3)
+			end
+		end
+	end
+	RockModule.RayCastEffect(RootPart, 10, 6.5, -6.5, 1, 1)
+	anim1:Stop()
+	wait(1.5)
+	Humanoid.AutoRotate = true
+	Humanoid.WalkSpeed = 16
+	Humanoid.JumpPower = 50
+	Humanoid.JumpHeight = 7.2
+	wait(3)
+	FX:Destroy()
+end)
