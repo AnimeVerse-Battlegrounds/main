@@ -1,0 +1,36 @@
+local ReplicatedStorage = game:WaitForChild("ReplicatedStorage")
+local Remote = script.Parent
+
+Remote.OnServerEvent:Connect(function(player, Skill)
+	local Character = player.Character
+	local RootPart = Character:FindFirstChild("HumanoidRootPart")
+	local TweenService = game:GetService("TweenService")
+	
+	if Skill == "Explode" then
+		print("Hello")
+		local Track = Instance.new("Animation")
+		Track.AnimationId = "rbxassetid://17276996007"
+		local Anim = Character.Humanoid:LoadAnimation(Track)
+		Anim:Play()
+		
+		local Effect = ReplicatedStorage.Effects.ExplosionFx:Clone()
+		Effect.CFrame = RootPart.Cframe + RootPart.CFrame.LookVector * 15
+		Effect.Orientation = RootPart.Orientation
+		Effect.Parent = workspace.FX
+		game.Debris:AddItem(Effect,3)
+		
+		local Position = Instance.new("BodyVelocity", RootPart)
+		Position.MaxForce = Vector3.new(99999,99999,99999)
+		Position.P = 300
+		Position.Velocity = RootPart.Cframe.LookVector * 0.5
+		game.Debris:AddItem(Position, .3)
+		
+		
+		wait(.4)
+		Effect.A.Part1:Emit(20)
+		Effect.A.Part1:Emit(20)
+		wait(.2)
+		Effect.A.Part1:Emit(20)
+		
+	end
+end)
