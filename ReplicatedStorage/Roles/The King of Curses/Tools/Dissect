@@ -1,0 +1,87 @@
+local module = {}
+local replicatedstorage =  game:GetService("ReplicatedStorage")
+local hitbox = require(replicatedstorage.Modules.Other.MuchachoHitbox)
+local function EmitAll(Ins)
+	for _, ins in pairs(Ins:GetDescendants()) do
+		if ins:IsA("ParticleEmitter") then
+			ins:Emit(2)
+		end
+	end
+end
+local replicatedstorage = game:GetService("ReplicatedStorage")
+local assets = replicatedstorage.Assets
+local modules = replicatedstorage.Modules
+local haki = assets.Part
+local cc = assets.ColorCorrection
+local moudlr = require(modules.Other.ModuleScript)
+local replicate = replicatedstorage.Remotes.Replicate
+local CameraShaker = require(modules.Other.CameraShaker)
+local TweenService = game:GetService("TweenService")
+function module.Conq(hrp, hum, wrd)
+	local cam = workspace.CurrentCamera
+	local clone = haki:Clone()
+	clone.Parent = workspace
+	clone.CFrame = hrp.CFrame + Vector3.new(0,-3,0)
+	local rone = cc:Clone()
+	rone.Parent = game.Lighting
+	local run = true
+	task.delay(5, function()
+		run = false
+	end)
+	coroutine.wrap(function()
+		local hb = hitbox.CreateHitbox()	
+		hb.Size = Vector3.new(88.1, 0.1, 92.1)
+		hb.CFrame = hrp.CFrame
+		local tweenInfo2 = TweenInfo.new(.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, 0, false, 0)
+		local targetFOV2 = 120
+		local tween2 = TweenService:Create(cam, tweenInfo2, { FieldOfView = targetFOV2 })
+		tween2:Play()
+		local ShakeCamera = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(vv)
+			cam.CFrame *= vv
+		end)
+		ShakeCamera:Start()
+		ShakeCamera:StartShake(10, 15, 0.25)
+		local done = false
+		hb.Visualizer = false
+		hb.Touched:Connect(function(hit, mud)
+			task.delay(10, function()
+				run = false
+				clone:Destroy()
+				hit.Parent:WaitForChild("IsRagdoll").Value = false
+				rone:Destroy()
+				local player = game.Players:GetPlayerFromCharacter(mud.Parent)
+				player.PlayerGui.ScreenGui.Frame.Visible = false
+				ShakeCamera:Stop()
+				local tweenInfo1 = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.In, 0, false, 0)
+				local targetFOV1 = 70
+				local tween1 = TweenService:Create(cam, tweenInfo1, { FieldOfView = targetFOV1 })
+				tween1:Play()
+			end)
+			if mud.Parent == hum.Parent then return end
+			moudlr.Keypress(wrd, function(result, sequenceCompleted)
+				
+				if result == "timesup" then
+					if done then
+						
+						return
+					else
+						hit.Parent:WaitForChild("IsRagdoll").Value = true
+					end	
+				elseif result == "correct" then
+					done = true
+					hit.Parent:WaitForChild("IsRagdoll").Value = false
+				elseif result == "incorrect" then
+					hit.Parent:WaitForChild("IsRagdoll").Value = true
+				end
+			end)
+		end)
+		hb:Start()
+		task.wait(9.5)
+		hb:Stop()
+	end)()
+	while run do
+		task.wait(.3)
+		EmitAll(clone)
+	end
+end
+return module
