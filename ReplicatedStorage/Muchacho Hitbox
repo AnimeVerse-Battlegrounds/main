@@ -1,0 +1,228 @@
+local rs = game:GetService("RunService")
+local hs = game:GetService("HttpService")
+
+local GoodSignal = require(script.GoodSignal)
+local DictDiff = require(script.DictDiff)
+
+local muchacho_hitbox = {}
+muchacho_hitbox.__index = muchacho_hitbox
+
+local HITBOX_COLOR = Color3.fromRGB(255,0,0)
+local HITBOX_TRANSPARENCY = 0.8
+
+
+local adornment_form = {
+	["Proportion"] = {
+		[Enum.PartType.Ball] = "Radius",
+		[Enum.PartType.Block] = "Size",
+	},
+
+	["Shape"] = {
+		[Enum.PartType.Ball] = "SphereHandleAdornment",
+		[Enum.PartType.Block] = "BoxHandleAdornment",
+	},
+}
+
+local get_CFrame = {
+	["Instance"] = function(point)
+		return point.CFrame
+	end,
+
+	["CFrame"] = function(point)
+		return point
+	end,
+}
+
+local spatial_query = {
+	[Enum.PartType.Ball] = function(self)
+		local point_type = typeof(self.CFrame)
+		local point_cframe = get_CFrame[point_type](self.CFrame)
+
+		local parts = workspace:GetPartBoundsInRadius(point_cframe.p + self.Offset.p, self.Size, self.OverlapParams)
+
+		return parts
+	end,
+
+	[Enum.PartType.Block] = function(self)
+		local point_type = typeof(self.CFrame)
+		local point_cframe = get_CFrame[point_type](self.CFrame)
+
+		local parts = workspace:GetPartBoundsInBox(point_cframe * self.Offset, self.Size, self.OverlapParams)
+
+		return parts
+	end,
+}
+
+local hitboxes = {}
+
+
+function muchacho_hitbox.CreateHitbox()
+	return setmetatable({
+		Visualizer = true,
+		DetectionMode = "Default",
+		AutoDestroy = true,	
+		Key = hs:GenerateGUID(false),
+
+		HitList = {},
+		TouchingParts = {},
+
+		Connection = nil,
+		Box = nil,
+
+		Touched = GoodSignal.new(),
+		TouchEnded = GoodSignal.new(),
+
+		OverlapParams = OverlapParams.new(),
+
+		Size = Vector3.new(0,0,0),
+		Shape = Enum.PartType.Block,
+		CFrame = CFrame.new(0,0,0),
+		Offset = CFrame.new(0,0,0)
+
+	}, muchacho_hitbox)
+end
+
+function muchacho_hitbox:FindHitbox(key)
+	if hitboxes[key] then
+		return hitboxes[key]
+	end
+end
+
+function muchacho_hitbox:_visualize()
+	if not self.Visualizer then return end
+
+	local point_type = typeof(self.CFrame)
+	local point_cframe = get_CFrame[point_type](self.CFrame)
+
+	local proportion = adornment_form.Proportion[self.Shape]
+
+	if self.Box then
+		self.Box.CFrame = point_cframe * self.Offset
+	else
+		self.Box = Instance.new(adornment_form.Shape[self.Shape])
+		self.Box.Name = "Visualizer"
+		self.Box.Adornee = workspace.Terrain
+		self.Box[proportion] = self.Size
+		self.Box.CFrame = point_cframe * self.Offset
+		self.Box.Color3 = HITBOX_COLOR
+		self.Box.Transparency = HITBOX_TRANSPARENCY
+		self.Box.Parent = workspace.Terrain
+	end
+end
+
+function muchacho_hitbox:_InsertTouchingParts(part)
+	if table.find(self.TouchingParts, part) then return end
+
+	table.insert(self.TouchingParts, part)
+end
+
+function muchacho_hitbox:_FindTouchEnded(parts)
+	if not self.TouchingParts[1] then return end
+
+	local mode = self.DetectionMode
+	local differences = DictDiff.difference(self.TouchingParts, parts)
+
+	if differences then
+		for _, diff in ipairs(differences) do
+			self.TouchEnded:Fire(diff)
+			table.remove(self.TouchingParts, table.find(self.TouchingParts, diff))
+		end
+	end
+end
+
+function muchacho_hitbox:_cast()
+	local mode = self.DetectionMode
+	local parts = spatial_query[self.Shape](self)
+
+	self:_FindTouchEnded(parts)
+
+	for _, hit in pairs(parts) do
+		local character = hit:FindFirstAncestorOfClass("Model") or hit.Parent
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+		-- detection mode
+		if mode == "Default" and humanoid and not self.HitList[table.find(self.HitList, humanoid)] then
+			table.insert(self.HitList, humanoid)
+			self:_InsertTouchingParts(hit)
+
+			self.Touched:Fire(hit, humanoid)
+
+		elseif mode == "ConstantDetection" and humanoid then
+			self:_InsertTouchingParts(hit)
+
+			self.Touched:Fire(hit, humanoid)
+
+		elseif mode == "HitOnce" and humanoid then
+			self:_InsertTouchingParts(hit)
+
+			self.Touched:Fire(hit, humanoid)
+			self.TouchEnded:Fire(hit)
+
+			self:Stop()
+			break
+
+		elseif mode == "HitParts" then
+			self:_InsertTouchingParts(hit)
+
+			self.Touched:Fire(hit)
+
+		end
+	end
+end
+
+function muchacho_hitbox:_clear()
+	self.HitList = {}
+
+	if self.Connection then
+		self.Connection:Disconnect()
+	end
+
+	if self.Key then
+		hitboxes[self.Key] = nil
+	end
+
+	if self.Box then
+		self.Box:Destroy()
+		self.Box = nil
+	end
+end
+
+function muchacho_hitbox:Start()
+	if hitboxes[self.Key] then
+		error("Error no key found")
+	end
+
+	hitboxes[self.Key] = self
+
+	-- looping the hitbox
+	task.spawn(function()	
+		self.Connection = rs.Heartbeat:Connect(function()
+			self:_visualize()
+			self:_cast()
+		end)
+	end)
+end
+
+function muchacho_hitbox:Stop()
+	-- clear hitbox
+	self:_clear()
+
+	if not self.AutoDestroy then return end
+
+	-- terminate hitbox
+	self.Touched:DisconnectAll()
+	self.TouchEnded:DisconnectAll()
+	setmetatable(self, nil)
+end
+
+function muchacho_hitbox:Destroy()
+	-- clear hitbox
+	self:_clear()
+
+	-- terminate hitbox
+	self.Touched:DisconnectAll()
+	self.TouchEnded:DisconnectAll()
+	setmetatable(self, nil)
+end
+
+return muchacho_hitbox
