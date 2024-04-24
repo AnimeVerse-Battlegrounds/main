@@ -1,0 +1,23 @@
+wait(3)
+
+local UserInputService = game:GetService("UserInputService")
+
+local Player = game.Players.LocalPlayer
+local Character = Player.Character
+local Remote = script.RemoteEvent
+
+local Key = "R"
+local Cooldown = true
+
+UserInputService.InputBegan:Connect(function(Input, IsTyping)
+	if IsTyping then return end
+	local KeyPressed = Input.KeyCode
+	if KeyPressed == Enum.KeyCode[Key] and Character and Cooldown == true then
+		Cooldown = false
+		
+		Remote:FireServer("Explode")
+		
+		wait(4)
+		Cooldown = true
+	end
+end)
