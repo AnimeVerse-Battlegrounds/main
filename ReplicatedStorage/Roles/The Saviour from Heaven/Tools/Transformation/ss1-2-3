@@ -1,0 +1,74 @@
+local module = {}
+
+function module.NormalForms(player, debounce)
+	local char = player.Character;
+	
+	-- FirstAttachment
+	local At1FirstAura = script.NormalForms.FirstAttachment.FirstAura:Clone();
+	At1FirstAura.Parent = char.Torso.FirstAttachment;
+	
+	local At1SecondAura = script.NormalForms.FirstAttachment.SecondAura:Clone();
+	At1SecondAura.Parent = char.Torso.FirstAttachment;
+	
+	local At1Wind = script.NormalForms.FirstAttachment.Wind;
+	local At1Wind_Clone = At1Wind:Clone();
+	At1Wind_Clone.Parent = char.Torso.FirstAttachment;
+	
+	task.spawn(function()
+		wait(.5);
+		At1Wind_Clone.Enabled = false;
+	end);
+	
+	-- SecondAttachment
+	local At2FirstAura = script.NormalForms.SecondAttachment.FirstAura:Clone();
+	At2FirstAura.Parent = char.Torso.SecondAttachment;
+
+	local At2SecondAura = script.NormalForms.SecondAttachment.SecondAura:Clone();
+	At2SecondAura.Parent = char.Torso.SecondAttachment;
+
+	local At2Smoke = script.NormalForms.SecondAttachment.Smoke:Clone();
+	At2Smoke.Parent = char.Torso.SecondAttachment;
+	
+	task.spawn(function()
+		wait(.5);
+		At2Smoke.Enabled = false;
+	end);
+	
+	-- ThirdAttachment
+	if debounce then
+		-- E
+		local E1 = script.NormalForms.ThirdAttachment.E1:Clone();
+		E1.Parent = char.Torso.ThirdAttachment;
+
+		local E2 = script.NormalForms.ThirdAttachment.E2:Clone();
+		E2.Parent = char.Torso.ThirdAttachment;
+
+		local E3 = script.NormalForms.ThirdAttachment.E3:Clone();
+		E3.Parent = char.Torso.ThirdAttachment;
+		
+		local E4 = script.NormalForms.ThirdAttachment.E4:Clone();
+		E4.Parent = char.Torso.ThirdAttachment;
+		
+		-- G
+		local G1 = script.NormalForms.ThirdAttachment.G1:Clone();
+		G1.Parent = char.Torso.ThirdAttachment;
+		
+		local G2 = script.NormalForms.ThirdAttachment.G2:Clone();
+		G2.Parent = char.Torso.ThirdAttachment;
+		
+		local G3 = script.NormalForms.ThirdAttachment.G3:Clone();
+		G3.Parent = char.Torso.ThirdAttachment;
+		
+		local G4 = script.NormalForms.ThirdAttachment.G4:Clone();
+		G4.Parent = char.Torso.ThirdAttachment;
+	end;
+	
+	char.Head.THead.Color = Color3.new(1, 1, 0.498039);
+	char["Left Arm"]["TLeft Arm"].Color = Color3.new(1, 1, 0.498039);
+	char["Left Leg"]["TLeft Leg"].Color = Color3.new(1, 1, 0.498039);
+	char["Right Arm"]["TRight Arm"].Color = Color3.new(1, 1, 0.498039);
+	char["Right Leg"]["TRight Leg"].Color = Color3.new(1, 1, 0.498039);
+	char.Torso.TTorso.Color = Color3.new(1, 1, 0.498039);
+end;
+
+return module
