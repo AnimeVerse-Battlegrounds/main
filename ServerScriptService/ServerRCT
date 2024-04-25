@@ -1,0 +1,47 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Debris = game:GetService("Debris")
+local part = ReplicatedStorage.Assets.Part
+local info = require(ReplicatedStorage.Modules.Info)
+local overlayModule = require(ReplicatedStorage.Modules.Libs.CameraOverlay)
+
+local module = {}
+
+function module.Regen(player, hrp)
+    local clone = part:Clone()
+    clone.Parent = workspace
+    clone.Position = hrp.Position + Vector3.new(0, -3, 0)
+    
+    local debounce = false
+    clone.Touched:Connect(function(hit)
+        if debounce or not hit.Parent:FindFirstChild("Humanoid") then
+            return
+        end
+        debounce = true
+
+        -- Trigger overlay effect
+        overlayModule:Start(ReplicatedStorage.Assets.ss.Attachment.Heal, 10, player)
+
+        -- Emit particles and increase health
+        for _, ins in pairs(clone:GetDescendants()) do
+            if ins:IsA("ParticleEmitter") then
+                ins:Emit(ins:GetAttribute("EmitCount"))
+            end
+        end
+        hit.Parent.Humanoid.Health += info.Health
+        wait(0.5)
+
+        debounce = false
+    end)
+
+    -- Clean up the part after 11 seconds
+    Debris:AddItem(clone, 11)
+end
+
+-- Register the module function to be called from client via RemoteEvent
+local RegenEvent = ReplicatedStorage:WaitForChild("RegenEvent")
+RegenEvent.OnServerEvent:Connect(function(player, hrp)
+    module.Regen(player, hrp)
+end)
+
+return module
