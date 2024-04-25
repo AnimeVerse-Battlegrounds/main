@@ -1,0 +1,69 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remote = ReplicatedStorage:WaitForChild("MalevolentShrine")
+local CollectionService = game:GetService("CollectionService")
+local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+local Assets = script:WaitForChild("Assets")
+local Setting = require(script:WaitForChild("Setting"))
+
+local function disableParticles(part)
+    for _, child in pairs(part:GetChildren()) do
+        if child:IsA("ParticleEmitter") then
+            child.Enabled = false
+        end
+    end
+end
+
+Remote.OnServerEvent:Connect(function(player, event, key)
+    local character = player.Character
+    local humanoid = character:FindFirstChild("Humanoid")
+    local root = character:FindFirstChild("HumanoidRootPart")
+
+    if not CollectionService:HasTag(character, "Attacking") and not CollectionService:HasTag(character, "MalevolentShrineCD") then
+        -- Set tags to manage state
+        CollectionService:AddTag(character, "Attacking")
+        CollectionService:AddTag(character, "MalevolentShrineCD")
+
+        local cooldown = Setting.Cooldown
+        local duration = Setting.Duration
+        local damage = Setting.Damage
+
+        -- Manipulate character
+        humanoid.WalkSpeed = 0
+        humanoid.JumpPower = 0
+        humanoid.JumpHeight = 0
+
+        -- Create visual and audio effects
+        local overhead = Assets.VFX.Part.Overhead:Clone()
+        overhead.Parent = root
+
+        local voice = Assets.SFX.Voice:Clone()
+        voice.Parent = root
+        voice:Play()
+        Debris:AddItem(voice, voice.TimeLength + 0.2)
+
+        -- Perform visual effects
+        local action = humanoid:LoadAnimation(Assets.Animations.Standing)
+        action:Play()
+
+        -- Create hitbox and damage logic
+        task.spawn(function()
+            local hitbox = workspace:GetPartBoundsInBox(root.CFrame, Setting.HitboxRange)
+            for _, part in pairs(hitbox) do
+                if part.Parent:FindFirstChild("Humanoid") and part.Parent ~= character then
+                    local enemyHumanoid = part.Parent:FindFirstChild("Humanoid")
+                    enemyHumanoid:TakeDamage(damage)
+                end
+            end
+        end)
+
+        task.delay(cooldown, function()
+            humanoid.WalkSpeed = Setting.SavedWalkSpeed
+            humanoid.JumpPower = Setting.SavedJumpPower
+            humanoid.JumpHeight = Setting.SavedJumpHeight
+            overhead:Destroy()
+            CollectionService:RemoveTag(character, "Attacking")
+            CollectionService:RemoveTag(character, "MalevolentShrineCD")
+        end)
+    end
+end)
