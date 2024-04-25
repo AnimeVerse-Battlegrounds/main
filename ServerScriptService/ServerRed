@@ -1,0 +1,114 @@
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+local RockModule = require(ServerStorage.Modules.RockModule)
+local EffectsFolder = workspace:FindFirstChild("Effects") or Instance.new("Folder", workspace)
+local Assets = ReplicatedStorage:WaitForChild("RedAssets")
+local Damage = 100
+
+local EffectEvent = ReplicatedStorage:WaitForChild("EffectEvent")  -- Assume a RemoteEvent exists
+
+-- Function to handle effects
+local function handleEffects(player)
+    local character = player.Character
+    local humanoid = character and character:FindFirstChild("Humanoid")
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+
+    if not humanoid or not rootPart then return end
+
+    local animation1 = humanoid:LoadAnimation(ServerStorage:FindFirstChild("Anim1"))
+    local animation2 = humanoid:LoadAnimation(ServerStorage:FindFirstChild("Anim2"))
+    local fxInstance = Assets:FindFirstChild("Red"):Clone()
+    local rArmEmitter = Assets.RA.Attachment:Clone()
+
+    rArmEmitter.Sound:Play()
+    rArmEmitter.Voice:Play()
+    rArmEmitter.Parent = character:FindFirstChild("Right Arm")
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+    humanoid.JumpHeight = 0
+
+    local velocity = Instance.new("BodyVelocity", rootPart)
+    velocity.MaxForce = Vector3.new(1, 1, 1) * 1000000
+    velocity.Velocity = Vector3.new(0, 0, 0)  -- Corrected to not move the player
+    velocity.Name = "SmallMoveVel"
+    game:GetService("Debris"):AddItem(velocity, 1)
+
+    fxInstance.Parent = EffectsFolder
+    fxInstance.CFrame = rootPart.CFrame * CFrame.new(0, 2, -5)
+    animation1:Play()
+
+    wait(1.25)
+    humanoid.AutoRotate = false
+
+    -- Disable particles -> enable specific ones
+    for _, particle in pairs(rArmEmitter.Attachment.Parent:GetDescendants()) do
+        if particle:IsA("ParticleEmitter") then
+            particle.Enabled = false
+        end
+    end
+
+    -- Activating new particle effects
+    rArmEmitter.N.Enabled = true
+    rArmEmitter.N2.Enabled = true
+    rArmEmitter.N3.Enabled = true
+
+    wait(0.5)
+    animation2:Play()
+    rArmEmitter:Destroy()
+    
+    fxInstance.CFrame = rootPart.CFrame * CFrame.new(0, -3, -25)
+    fxInstance.Sound:Play()
+
+    -- Emitting particles from various sources
+    local emitters = {fxInstance.Red.Attachment, fxInstance.Red.Attachment2, fxInstance.Red.Explode, fxInstance.Red.Parent, fxInstance.Red.FX, fxInstance.Red.FX2}
+    for _, emitter in ipairs(emitters) do
+        for _, particle in pairs(emitter:GetDescendants()) do
+            if particle:IsA("ParticleEmitter") then
+                particle:Emit(particle:GetAttribute("EmitCount"))
+            end
+        end
+    end
+
+    local hitcontent = workspace:GetPartBoundsInBox(fxInstance.CFrame, Vector3.new(18, 14.5, 52))
+    local hitlist = {}
+    for _, v in pairs(hitcontent) do
+        local otherHumanoid = v.Parent:FindFirstChild("Humanoid")
+        if otherHumanoid and v.Parent ~= character then
+            if not hitlist[otherHumanoid] then
+                hitlist[otherHumanoid] = true
+                otherHumanoid:TakeDamage(Damage)
+                local otherVelocity = Instance.new("BodyVelocity", otherHumanoid.RootPart)
+                otherVelocity.MaxForce = Vector3.new(1, 1, 1) * 1000000
+                otherVelocity.Velocity = rootPart.CFrame.LookVector * 180
+                otherVelocity.Name = "SmallMoveVel"
+                game:GetService("Debris"):AddItem(otherVelocity, 0.1)
+
+                local hitFX = Assets.HitFX.Attach:Clone()
+                hitFX.Parent = otherHumanoid.RootPart
+                for _, particle in pairs(hitFX:GetDescendants()) do
+                    if particle:IsA("ParticleEmitter") then
+                        particle:Emit(particle:GetAttribute("EmitCount"))
+                    end
+                end
+                game:GetService("Debris"):AddItem(hitFX, 3)
+            end
+        end
+    end
+
+    RockModule.RayCastEffect(rootPart, 10, 6.5, -6.5, 1, 1)
+
+    wait(1.5)
+    animation1:Stop()
+
+    humanoid.AutoRotate = true
+    humanoid.WalkSpeed = 16
+    humanoid.JumpPower = 50
+    humanoid.JumpHeight = 7.2
+
+    wait(3)
+    fxInstance:Destroy()
+end
+
+-- Connect the RemoteEvent to the function
+EffectEvent.OnServerEvent:Connect(handleEffects)
