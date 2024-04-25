@@ -1,0 +1,18 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local ThrowRemote = ReplicatedStorage:WaitForChild("ThrowRemote")
+
+local function onInputBegan(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then -- Assuming left mouse click triggers the throw
+        local player = Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local mouse = player:GetMouse()
+            local mousePosition = mouse.Hit.p -- Get the 3D world position where the mouse is pointing
+            ThrowRemote:FireServer(mousePosition) -- Trigger the server event with the necessary position
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(onInputBegan)
