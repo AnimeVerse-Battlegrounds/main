@@ -1,0 +1,51 @@
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local lightingService = game:GetService("Lighting")
+local starterGui = game:GetService("StarterGui")
+
+local activateEffectEvent = replicatedStorage:WaitForChild("ActivateEffect")
+
+local cooldown = 20
+local activePlayers = {}
+
+-- Function to handle effect activation
+local function handleEffectActivation(player)
+    if activePlayers[player.UserId] then
+        return  -- Exit if the player is already in a cooldown period
+    end
+
+    activePlayers[player.UserId] = true
+
+    -- Disable the player's backpack GUI
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false, player)
+
+    -- Example of enabling and configuring lighting effects
+    lightingService.Purple.Enabled = true
+    lightingService.Purple.Contrast = 0.5
+    lightingService.Purple.Saturation = 0.1
+    lightingService.Purple.Brightness = 0.2
+
+    -- Logic to handle the duration and steps of effect
+    -- Replace this with specific server-side logic for effect duration, steps, etc.
+    wait(4.4)  -- Simulate the duration of the effect
+
+    -- Reset changes after the effect
+    lightingService.Purple.Enabled = false
+
+    -- Re-enable the player's backpack GUI after the cooldown
+    wait(cooldown)  -- Wait for the cooldown period to end
+    starterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true, player)
+
+    -- Remove the player from the cooldown tracking
+    activePlayers[player.UserId] = nil
+end
+
+-- Connect the RemoteEvent to the handler function
+activateEffectEvent.OnServerEvent:Connect(handleEffectActivation)
+
+-- Function to clean up on player death or disconnect
+local function cleanupPlayer(player)
+    activePlayers[player.UserId] = nil
+end
+
+-- Connect player removal to cleanup function
+game.Players.PlayerRemoving:Connect(cleanupPlayer)
