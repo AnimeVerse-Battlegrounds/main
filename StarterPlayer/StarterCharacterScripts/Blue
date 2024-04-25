@@ -1,0 +1,22 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+
+local effectTrigger = ReplicatedStorage:WaitForChild("EffectTrigger")
+
+local activationKey = Enum.KeyCode.E
+
+local function handleInput(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == activationKey then
+        -- Trigger the effect on the server
+        effectTrigger:FireServer()
+    end
+end
+
+-- Connect the input event
+UserInputService.InputBegan:Connect(handleInput)
+
+local player = Players.LocalPlayer
+player.PlayerGui:WaitForChild("ScreenGui"):WaitForChild("TextButton").Text = "Press 'E'"
+
