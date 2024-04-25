@@ -5,6 +5,7 @@ local fireSpiritBomb = ReplicatedStorage:WaitForChild("FireSpiritBomb")
 
 local function onKeyPress(input, gameProcessed)
     if gameProcessed then return end
+    if typing then return end
     if input.KeyCode == Enum.KeyCode.Y then
         local mouse = game.Players.LocalPlayer:GetMouse()
         fireSpiritBomb:FireServer(mouse.Hit.p)
