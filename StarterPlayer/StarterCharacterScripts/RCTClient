@@ -2,6 +2,7 @@ local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RegenEvent = ReplicatedStorage:WaitForChild("RegenEvent")
 local player = game.Players.LocalPlayer
+local cooldown = false
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
@@ -12,5 +13,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if hrp then
             RegenEvent:FireServer(hrp)
         end
+        task.wait(90)
+		cooldown = false
     end
 end)
