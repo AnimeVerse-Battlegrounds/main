@@ -1,0 +1,11 @@
+local uis = game:GetService("UserInputService")
+
+local remote = game.ReplicatedStorage:WaitForChild("Summon")
+
+uis.InputBegan:Connect(function(key, typing)
+	if typing then return end
+	
+	if key.KeyCode == Enum.KeyCode.Q then
+		remote:FireServer()
+	end
+end)
