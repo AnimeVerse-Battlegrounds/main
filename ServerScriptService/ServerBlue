@@ -1,0 +1,74 @@
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+local EffectsFolder = workspace:FindFirstChild("Effects") or Instance.new("Folder", workspace)
+
+local Assets = ReplicatedStorage:WaitForChild("BlueAssets")
+local EffectEvent = ReplicatedStorage:WaitForChild("EffectTrigger")  -- Assume a RemoteEvent exists
+
+-- Function to handle effects
+local function handleEffects(player)
+    local character = player.Character
+    local humanoid = character and character:FindFirstChild("Humanoid")
+    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+    
+    if not humanoid or not rootPart then return end
+
+    local animation = humanoid:LoadAnimation(ServerStorage:FindFirstChild("Animation1"))
+    local fxInstance = Assets:FindFirstChild("Blue"):Clone()
+    local emitter = Assets:FindFirstChild("RA").Emit:Clone()
+
+    emitter.Parent = character:FindFirstChild("Right Arm")
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+    humanoid.JumpHeight = 0
+
+    fxInstance.Parent = EffectsFolder
+    fxInstance.CFrame = rootPart.CFrame * CFrame.new(0, 2, -5)
+    animation:Play()
+
+    wait(0.5)
+    humanoid.AutoRotate = false
+
+    fxInstance.CFrame = rootPart.CFrame * CFrame.new(0, -3, -25)
+    fxInstance:FindFirstChild("Sound"):Play()
+
+    local hitContents = workspace:GetPartBoundsInBox(fxInstance.CFrame, Vector3.new(18, 14.5, 52))
+    local hitList = {}
+
+    for _, hit in pairs(hitContents) do
+        local hitHumanoid = hit.Parent and hit.Parent:FindFirstChild("Humanoid")
+        if hitHumanoid and hit.Parent ~= character then
+            if not hitList[hitHumanoid] then
+                hitList[hitHumanoid] = true
+
+                local teleportPosition = Assets:FindFirstChild("Root"):Clone()
+                teleportPosition.Parent = hitHumanoid.RootPart
+                teleportPosition.Motor6D.Part1 = hitHumanoid.RootPart
+
+                player.Character:MoveTo(teleportPosition.Position)
+                teleportPosition:Destroy()
+
+                local velocity = Instance.new("BodyVelocity", hitHumanoid.RootPart)
+                velocity.MaxForce = Vector3.new(1, 1, 1) * 1000000
+                velocity.Velocity = Vector3.new(1, 1, 1) * player.Character:FindFirstChild("HumanoidRootPart").CFrame.LookVector * 0
+                velocity.Name = "SmallMoveVel"
+                game:GetService("Debris"):AddItem(velocity, 0.1)
+            end
+        end
+    end
+
+    wait(0.5)
+    animation:Stop()
+
+    humanoid.AutoRotate = true
+    humanoid.WalkSpeed = 16
+    humanoid.JumpPower = 50
+    humanoid.JumpHeight = 7.2
+
+    wait(3)
+    fxInstance:Destroy()
+end
+
+-- Connect the RemoteEvent to the function
+EffectEvent.OnServerEvent:Connect(handleEffects)
