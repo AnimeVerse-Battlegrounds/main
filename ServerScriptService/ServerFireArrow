@@ -1,0 +1,59 @@
+-- ServerScriptService
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FireballRS = ReplicatedStorage:WaitForChild("FireballReplicatedStorage")
+local RemoteEvent = FireballRS:WaitForChild("RemoteEvent")
+local config = require(FireballRS:WaitForChild("CONFIGURATION"))
+
+-- Handle Fire Arrow shooting event from clients
+RemoteEvent.OnServerEvent:Connect(function(player, targetPosition)
+    -- Validate player action and check cooldowns here
+    if not player or not player.Character then return end
+    
+    local char = player.Character
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Calculate parameters for fireball trajectory and effects
+    local distance = (hrp.Position - targetPosition).Magnitude
+    local travelTime = distance / config.fireballSpeed
+    local randomOffset = Vector3.new(
+        math.random(-1, 1) * config.maxFireballOffset * (distance / 100),
+        math.random(-1, 1) * config.maxFireballOffset * (distance / 100),
+        math.random(-1, 1) * config.maxFireballOffset * (distance / 100)
+    )
+    local midPoint = hrp.Position:Lerp(targetPosition, 0.5) + randomOffset
+
+    -- Simulate fireball trajectory
+    local fireball = FireballRS.FireballParts.Fireball:Clone()
+    fireball.Position = hrp.Position
+    fireball.Anchored = true
+    fireball.CanCollide = false
+    fireball.Parent = workspace
+
+    -- Animation from start to target
+    local steps = 30
+    for i = 1, steps do
+        fireball.Position = BezierCurve(hrp.Position, midPoint, targetPosition, i / steps)
+        wait(travelTime / steps)
+    end
+
+    -- Explosion effect
+    local explosion = FireballRS.FireballParts.Explosion:Clone()
+    explosion.Position = targetPosition
+    explosion.Parent = workspace
+    explosion:WaitForChild("Sound").Play()
+    ApplyExplosionEffects(targetPosition)
+
+    -- Cleanup
+    fireball:Destroy()
+    game:GetService("Debris"):AddItem(explosion, 5)  -- Cleans up after 5 seconds
+end)
+
+function BezierCurve(p0, p1, p2, t)
+    local p0p1 = p0:Lerp(p1, t)
+    local p1p2 = p1:Lerp(p2, t)
+    return p0p1:Lerp(p1p2, t)
+end
+
+function ApplyExplosionEffects(position)
+end
