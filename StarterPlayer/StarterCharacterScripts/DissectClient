@@ -1,0 +1,23 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local replicateEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Replicate")
+
+local activationKey = Enum.KeyCode.Q  -- Change to whatever key you prefer for activating the Haki
+
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == activationKey then
+        local player = Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            -- Fire the server event, passing necessary parameters
+            replicateEvent:FireServer(player.Character.HumanoidRootPart, player.Character.Humanoid, "world parameter here")
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
+
+local player = Players.LocalPlayer
+player.PlayerGui:WaitForChild("ScreenGui"):WaitForChild("TextButton").Text = "Press 'Q' to activate Diessect"
