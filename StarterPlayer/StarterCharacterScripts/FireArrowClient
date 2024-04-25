@@ -1,14 +1,22 @@
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local FireArrow = ReplicatedStorage:WaitForChild("FireArrow")
+local cooldown = False
 
 
 local function onKeyPress(input, gameProcessed)
     if gameProcessed then return end
     if typing then return end
     if input.KeyCode == Enum.KeyCode.T then
+        cooldown = true
         local mouse = game.Players.LocalPlayer:GetMouse()
         FireArrow:FireServer(mouse.Hit.p)
+        local Track = Instance.new("Animation")
+		Track.AnimationId = "rbxassetid://17230037458"
+		local Anim = Character.Humanoid:LoadAnimation(Track)
+		Anim:Play()
+		task.wait(30)
+		cooldown = false
     end
 end
 
