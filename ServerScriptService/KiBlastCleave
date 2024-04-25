@@ -1,0 +1,10 @@
+-- Server Script Service
+local ToolEvent = game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvent")
+
+-- Function to handle the tool activation from the client
+local function onToolActivated(player, animationIndex)
+    print("Player " .. player.Name .. " activated animation with index: " .. tostring(animationIndex))
+end
+
+-- Connect the RemoteEvent to the handler function
+ToolEvent.OnServerEvent:Connect(onToolActivated)
