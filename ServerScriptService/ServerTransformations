@@ -1,0 +1,61 @@
+local module = {}
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Effects = ReplicatedStorage:WaitForChild("Effects")  -- Assuming you store effect assets here
+
+function module.NormalForms(player, debounce)
+    local char = player.Character
+    if not char then return end  -- Always check for existence
+
+    local torso = char:FindFirstChild("Torso")
+    if not torso then return end
+
+    local firstAttachment = torso:FindFirstChild("FirstAttachment")
+    local secondAttachment = torso:FindFirstChild("SecondAttachment")
+    local thirdAttachment = torso:FindFirstChild("ThirdAttachment")
+
+    if firstAttachment and secondAttachment and thirdAttachment then
+        -- Apply effects to the first attachment
+        local firstAuras = Effects.NormalForms.FirstAttachment:GetChildren()
+        for _, effect in pairs(firstAuras) do
+            local clone = effect:Clone()
+            clone.Parent = firstAttachment
+            -- Disable specific effects after a delay
+            if clone.Name == "Wind" then
+                task.delay(0.5, function()
+                    if clone then clone.Enabled = false end
+                end)
+            end
+        end
+
+        local secondAuras = Effects.NormalForms.SecondAttachment:GetChildren()
+        for _, effect in pairs(secondAuras) do
+            local clone = effect:Clone()
+            clone.Parent = secondAttachment
+            -- Disable specific effects after a delay
+            if clone.Name == "Smoke" then
+                task.delay(0.5, function()
+                    if clone then clone.Enabled = false end
+                end)
+            end
+        end
+
+        if debounce then
+            local thirdEffects = Effects.NormalForms.ThirdAttachment:GetChildren()
+            for _, effect in pairs(thirdEffects) do
+                local clone = effect:Clone()
+                clone.Parent = thirdAttachment
+            end
+        end
+    end
+
+    -- Change the color of various character parts
+    local bodyParts = {"Head", "Left Arm", "Left Leg", "Right Arm", "Right Leg", "Torso"}
+    for _, partName in pairs(bodyParts) do
+        local bodyPart = char:FindFirstChild(partName)
+        if bodyPart and bodyPart:IsA("BasePart") then
+            bodyPart.Color = Color3.fromRGB(255, 255, 127) -- Light yellow
+        end
+    end
+end
+
+return module
