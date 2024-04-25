@@ -1,0 +1,15 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FireArrow = ReplicatedStorage:WaitForChild("FireArrow")
+
+
+local function onKeyPress(input, gameProcessed)
+    if gameProcessed then return end
+    if typing then return end
+    if input.KeyCode == Enum.KeyCode.T then
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        FireArrow:FireServer(mouse.Hit.p)
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
