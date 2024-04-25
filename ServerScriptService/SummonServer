@@ -1,0 +1,45 @@
+local remote = game.ReplicatedStorage:WaitForChild("Summon")
+local TS = game:GetService("TweenService")
+local info = TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+
+local function summon(character)
+	
+	local rootpart = character.HumanoidRootPart
+	local stand = game.ServerStorage.Stand:Clone()
+	local stand_rp = stand.PrimaryPart
+	stand_rp.CFrame = rootpart.CFrame
+	
+	for i, v in pairs(stand:GetDescendants()) do
+		if v:IsA("Part") then
+			v.Transparency = 1
+		end
+	end
+		
+	local weld = Instance.new("Weld")
+	weld.Part0 = rootpart
+	weld.Part1 = stand_rp
+	for i, v in pairs(stand:GetDescendants()) do
+		if v:IsA("Part") then
+			TS:Create(v, info, {Transparency = 0}):Play()
+		end
+	end
+	TS:Create(weld, info, {C1 = CFrame.new(2, -1, -2)}):Play()
+	
+	weld.Parent = stand
+	stand.Parent = character
+end
+
+local function unsummon(character)
+	local stand = character.stand
+	stand:Destroy()
+	
+	if stand then
+		unsummon()
+	else
+		unsummon()
+	end
+end
+remote.OnServerEvent:Connect(function(player)
+	local character = player.Character
+end)
