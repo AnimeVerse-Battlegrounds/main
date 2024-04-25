@@ -1,0 +1,24 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remote = ReplicatedStorage:WaitForChild("MalevolentShrine")
+local activationKey = Enum.KeyCode.Q  -- Define the key to activate the effect
+
+local function onKeyPress(input, gameProcessed)
+    if gameProcessed then return end  -- Ignore if the input was already processed by another script
+    if input.KeyCode == activationKey then
+        -- Fire the server event when the defined key is pressed
+        Remote:FireServer()
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
+
+local player = game:GetService("Players").LocalPlayer
+local screenGui = player.PlayerGui:FindFirstChild("YourGuiName")  -- Make sure to replace 'YourGuiName' with the actual name of your GUI
+local button = screenGui and screenGui:FindFirstChild("ActivateButton")  -- Replace 'ActivateButton' with your button's name
+
+if button then
+    button.MouseButton1Click:Connect(function()
+        Remote:FireServer()
+    end)
+end
