@@ -1,0 +1,27 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local activateEffectEvent = ReplicatedStorage:WaitForChild("ActivateEffect")
+
+local activationKey = Enum.KeyCode.E -- You can change this to whatever key you prefer
+
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then
+        return
+    end
+    if input.KeyCode == activationKey then
+        -- Fire the server event to activate the effect
+        activateEffectEvent:FireServer()
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
+
+local player = game.Players.LocalPlayer
+local screenGui = script.Parent
+local button = screenGui:FindFirstChild("ActivateButton")
+
+if button then
+    button.MouseButton1Click:Connect(function()
+        activateEffectEvent:FireServer()
+    end)
+end
