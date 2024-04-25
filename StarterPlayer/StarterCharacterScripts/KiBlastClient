@@ -1,0 +1,27 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ToolEvent = ReplicatedStorage:WaitForChild("RemoteEvent")
+
+local activationKey = Enum.KeyCode.R 
+
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == activationKey then
+        local animationIndex = 1  
+        ToolEvent:FireServer(animationIndex)  
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local screenGui = player:FindFirstChildWhichIsA("ScreenGui")
+local button = screenGui and screenGui:FindFirstChild("ActivateButton")
+
+if button then
+    button.MouseButton1Click:Connect(function()
+        local animationIndex = 1 
+        ToolEvent:FireServer(animationIndex)  
+    end)
+end
