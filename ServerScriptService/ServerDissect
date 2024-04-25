@@ -1,0 +1,64 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Modules = ReplicatedStorage:WaitForChild("Modules")
+local CameraShaker = require(Modules.Other.CameraShaker)
+local HitboxModule = require(Modules.Other.MuchachoHitbox)
+local ModuleScript = require(Modules.Other.ModuleScript)
+
+local Assets = ReplicatedStorage:WaitForChild("Assets")
+local ColorCorrection = Assets.ColorCorrection
+local PartAsset = Assets.Part
+
+local Remote = ReplicatedStorage:WaitForChild("Remotes").Replicate
+
+local Module = {}
+
+function Module.ConquerorsHaki(hrp, humanoid, world)
+    local cam = workspace.CurrentCamera
+    local clone = PartAsset:Clone()
+    clone.Parent = workspace
+    clone.CFrame = hrp.CFrame + Vector3.new(0, -3, 0)
+
+    local colorCorrection = ColorCorrection:Clone()
+    colorCorrection.Parent = game.Lighting
+
+    local shakeCamera = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCFrame)
+        cam.CFrame *= shakeCFrame
+    end)
+
+    local hitbox = HitboxModule.CreateHitbox()
+    hitbox.Size = Vector3.new(88.1, 0.1, 92.1)
+    hitbox.CFrame = hrp.CFrame
+    hitbox.Visualizer = false
+
+    local function adjustCameraFOV(targetFOV, duration)
+        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+        local tween = TweenService:Create(cam, tweenInfo, {FieldOfView = targetFOV})
+        tween:Play()
+    end
+
+    shakeCamera:Start()
+    shakeCamera:StartShake(10, 15, 0.25)
+
+    -- Engage the hitbox and wait for interactions
+    hitbox.Touched:Connect(function(hit, playerHit)
+        local player = game.Players:GetPlayerFromCharacter(playerHit.Parent)
+        if player then
+            -- Handle game logic depending on hit
+            ModuleScript.HandleInteraction(world, player, function(result)
+                -- Manage game state based on result
+            end)
+        end
+    end)
+
+    hitbox:Start()
+    task.delay(10, function()
+        hitbox:Stop()
+        shakeCamera:Stop()
+        colorCorrection:Destroy()
+        clone:Destroy()
+        adjustCameraFOV(70, 1)  -- Reset the camera FOV
+    end)
+end
+
+return Module
