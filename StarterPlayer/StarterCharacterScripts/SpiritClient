@@ -1,6 +1,7 @@
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local fireSpiritBomb = ReplicatedStorage:WaitForChild("FireSpiritBomb")
+local cooldown = false
 
 
 local function onKeyPress(input, gameProcessed)
@@ -9,6 +10,12 @@ local function onKeyPress(input, gameProcessed)
     if input.KeyCode == Enum.KeyCode.Y then
         local mouse = game.Players.LocalPlayer:GetMouse()
         fireSpiritBomb:FireServer(mouse.Hit.p)
+        local Track = Instance.new("Animation")
+		Track.AnimationId = "rbxassetid://55319694886"
+		local Anim = Character.Humanoid:LoadAnimation(Track)
+		Anim:Play()
+		task.wait(30)
+		cooldown = false
     end
 end
 
