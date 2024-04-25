@@ -1,0 +1,21 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local effectTrigger = ReplicatedStorage:WaitForChild("EffectEvent")
+
+local activationKey = Enum.KeyCode.Q  -- Change to your preferred key
+
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == activationKey then
+        -- Fire the server event
+        local player = Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local mousePosition = player:GetMouse().Hit.p
+            effectTrigger:FireServer(mousePosition)
+        end
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
