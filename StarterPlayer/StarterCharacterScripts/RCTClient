@@ -1,0 +1,16 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RegenEvent = ReplicatedStorage:WaitForChild("RegenEvent")
+local player = game.Players.LocalPlayer
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if typing then return end
+    if input.KeyCode == Enum.KeyCode.G then
+        local character = player.Character
+        local hrp = character and character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            RegenEvent:FireServer(hrp)
+        end
+    end
+end)
