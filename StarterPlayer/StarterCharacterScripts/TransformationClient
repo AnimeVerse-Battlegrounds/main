@@ -1,0 +1,26 @@
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local effectsModule = require(ReplicatedStorage:WaitForChild("Mod")) 
+
+local activationKey = Enum.KeyCode.F  
+
+local player = Players.LocalPlayer
+local screenGui = player.PlayerGui:FindFirstChild("Display GUI")  
+local button = screenGui and screenGui:FindFirstChild("F")
+
+local function onKeyPress(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.KeyCode == activationKey then
+        effectsModule.NormalForms(player, false)
+    end
+end
+
+UserInputService.InputBegan:Connect(onKeyPress)
+
+if button then
+    button.MouseButton1Click:Connect(function()
+        effectsModule.NormalForms(player, false)  -- Same here, adjust debounce as needed
+    end)
+end
