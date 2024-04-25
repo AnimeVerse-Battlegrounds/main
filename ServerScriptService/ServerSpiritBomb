@@ -1,0 +1,85 @@
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Debris = game:GetService("Debris")
+
+local SpiritBombEvent = ReplicatedStorage:WaitForChild("SpiritBomb")
+local Sounds = ReplicatedStorage:WaitForChild("Sounds")
+local KiAttacks = ReplicatedStorage:WaitForChild("KiAttacks")
+
+SpiritBombEvent.OnServerEvent:Connect(function(player, mousePosition)
+    local character = player.Character
+    local humanoid = character:FindFirstChild("Humanoid")
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+
+    if not humanoid or not rootPart then return end
+
+    local animation = humanoid:LoadAnimation(script:WaitForChild("Animation"))
+    animation:Play()
+    humanoid.WalkSpeed = 0  -- Disable movement during attack
+
+    -- Spirit bomb creation
+    local spiritBomb = KiAttacks.SpiritB:Clone()
+    spiritBomb.Anchored = true
+    spiritBomb.CanCollide = false
+    spiritBomb.Parent = workspace
+    spiritBomb.CFrame = rootPart.CFrame + Vector3.new(0, 15, 0)
+    Debris:AddItem(spiritBomb, 7)  -- Cleanup
+
+
+    local chargeSound = Sounds.Charge:Clone()
+    chargeSound.Parent = spiritBomb
+    chargeSound:Play()
+
+    -- Spirit bomb size animation
+    local tween = TweenService:Create(spiritBomb, TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {Size = Vector3.new(15, 15, 15)})
+    tween:Play()
+
+    wait(4)  -- Wait for the charge animation to finish
+    animation:Stop()
+
+    local throwAnimation = humanoid:LoadAnimation(script:WaitForChild("Throw"))
+    throwAnimation:Play()
+    spiritBomb.Anchored = false
+
+    spiritBomb.CFrame = CFrame.new(spiritBomb.Position, mousePosition.Position)
+
+    -- Add velocity to move the spirit bomb
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bodyVelocity.Velocity = spiritBomb.CFrame.LookVector * 45
+    bodyVelocity.Parent = spiritBomb
+    chargeSound:Stop()
+
+    -- Restore player movement
+    humanoid.WalkSpeed = 16
+
+    spiritBomb.Touched:Connect(function(hit)
+        if hit:IsDescendantOf(character) then return end  -- Ignore collision with the player themselves
+        if hit.Parent:FindFirstChild("Humanoid") then
+            hit.Parent.Humanoid:TakeDamage(50)  -- Damage logic
+            spiritBomb.Anchored = true
+
+            -- Explosion effects
+            local explodeSound = Sounds.Explode:Clone()
+            explodeSound.Parent = spiritBomb
+            explodeSound:Play()
+
+            local explosionEffect = TweenService:Create(spiritBomb, TweenInfo.new(0.5), {Transparency = 1, Size = Vector3.new(20, 20, 20)})
+            explosionEffect:Play()
+
+            local wave = KiAttacks.Wave:Clone()
+            wave.Position = hit.Parent.HumanoidRootPart.Position + Vector3.new(0, -2, 0)
+            wave.Parent = workspace
+            Debris:AddItem(wave, 1)
+
+            local waveEffect = TweenService:Create(wave, TweenInfo.new(0.5), {Transparency = 1, Size = Vector3.new(20.775, 2.3, 20.505)})
+            waveEffect:Play()
+
+            local knockback = Instance.new("BodyVelocity")
+            knockback.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            knockback.Velocity = hit.Parent.HumanoidRootPart.CFrame.LookVector * -55
+            knockback.Parent = hit.Parent.HumanoidRootPart
+            Debris:AddItem(knockback, 1)
+        end
+    end)
+end)
