@@ -1,0 +1,16 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local fireSpiritBomb = Instance.new("RemoteEvent", ReplicatedStorage)
+fireSpiritBomb.Name = "FireSpiritBomb"
+
+-- Function to handle the spirit bomb
+local function onSpiritBombRequested(player, targetPosition)
+    -- Logic to create and handle the spirit bomb effect
+    -- Example: Creating an explosion at the target position
+    local explosion = Instance.new("Explosion")
+    explosion.Position = targetPosition
+    explosion.BlastRadius = 10
+    explosion.BlastPressure = 100000
+    explosion.Parent = game.Workspace
+end
+
+fireSpiritBomb.OnServerEvent:Connect(onSpiritBombRequested)
